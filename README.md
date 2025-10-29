@@ -1,410 +1,388 @@
-# WordPress Starter avec Stack d'Automatisation
+# WordPress Starter with Automation Stack
 
-Ce repository contient un stack WordPress complet basé sur Docker avec des services d'automatisation et d'intelligence artificielle intégrés. Le projet combine WordPress avec n8n (automatisation), Qdrant (base de données vectorielle), PostgreSQL, Redis et MySQL pour créer un environnement de développement moderne et extensible.
+This repository contains a complete Docker-based WordPress stack with integrated automation and artificial intelligence services. The project combines WordPress with n8n (automation), Qdrant (vector database), PostgreSQL, Redis and MySQL to create a modern and extensible development environment.
 
-## 🎯 Vue d'ensemble
+## 🎯 Overview
 
-**Stack principal :**
-- **WordPress** : CMS principal avec thème parent Timber et thème enfant Tiz
-- **n8n** : Plateforme d'automatisation de workflows
-- **Qdrant** : Base de données vectorielle pour l'IA/ML
-- **PostgreSQL** : Base de données pour n8n
-- **MySQL** : Base de données WordPress
-- **Redis** : Cache et gestion des sessions
+**Main Stack:**
+- **WordPress**: Main CMS with Timber parent theme and Tiz child theme
+- **n8n**: Workflow automation platform
+- **Qdrant**: Vector database for AI/ML
+- **PostgreSQL**: Database for n8n
+- **MySQL**: WordPress database
+- **Redis**: Cache and session management
 
-**Intégrations clés :**
-- Contact Form 7 connecté à n8n via webhooks personnalisés (thème Tiz)
-- Thème parent Timber avec Twig et librairies PHP extensibles
-- Thème enfant Tiz avec stack front-end moderne
-- Pipeline CI/CD prêt pour Bitbucket
+**Key Integrations:**
+- Contact Form 7 connected to n8n via custom webhooks (Tiz theme)
+- Timber parent theme with Twig and extensible PHP libraries
+- Tiz child theme with modern front-end stack
+- CI/CD pipeline ready for Bitbucket
 
-## 📋 Prérequis
+## 📋 Prerequisites
 
-- Docker Engine et Docker Compose plugin
-- Node.js 18+ (pour le développement front-end)
-- Composer (pour les dépendances PHP)
+- Docker Engine and Docker Compose plugin
+- Node.js 18+ (for front-end development)
+- Composer (for PHP dependencies)
 
-## 🚀 Démarrage Rapide
+## 🚀 Quick Start
 
-### Configuration initiale
+### Initial Configuration
 
-1. **Copier le fichier d'environnement :**
+1. **Copy the environment file:**
    ```bash
    cp .env.example .env
    ```
 
-2. **Configurer les variables d'environnement :**
-   - `WORDPRESS_ENV=development` pour le développement local
-   - `WORDPRESS_ENV=production` pour la production
-   - Ajuster les ports et mots de passe selon vos besoins
+2. **Configure environment variables:**
+   - `WORDPRESS_ENV=development` for local development
+   - `WORDPRESS_ENV=production` for production
+   - Adjust ports and passwords according to your needs
 
-### Démarrage en Développement
+### Development Setup
 
-1. **Installer les dépendances des thèmes :**
+1. **Install theme dependencies:**
    ```bash
-   # Thème Timber (dépendances PHP)
+   # Timber Theme (PHP dependencies)
    cd wordpress/wp-content/themes/timber-starter-theme
    composer install
    ```
 
    ```bash
-   # Thème Tiz (dépendances Node.js)
+   # Tiz Theme (Node.js dependencies)
    cd wordpress/wp-content/themes/tiz
    npm install
    ```
 
-2. **Démarrer le stack Docker :**
+2. **Start the Docker stack:**
    ```bash
    docker compose up -d
    ```
 
-3. **Lancer le développement front-end (thème Tiz) :**
+3. **Launch front-end development (Tiz theme):**
    ```bash
    cd wordpress/wp-content/themes/tiz
    npm run dev
    ```
-   Ceci lance Webpack en mode watch et BrowserSync pour le rechargement automatique.
+   This starts Webpack in watch mode and BrowserSync for automatic reloading.
 
-4. **Accéder aux services :**
-   - WordPress : http://localhost:8080
-   - n8n : http://localhost:5678
-   - BrowserSync (si activé) : http://localhost:3000
+4. **Access services:**
+   - WordPress: http://localhost:8080
+   - n8n: http://localhost:5678
+   - BrowserSync (if enabled): http://localhost:3000
 
-### Démarrage en Production
+### Production Deployment
 
-1. **Configurer l'environnement de production :**
+1. **Configure production environment:**
    ```bash
-   # Dans le fichier .env
+   # In server's .env file
    WORDPRESS_ENV=production
+   # Add all production URLs, database credentials, API keys, etc.
    ```
 
-2. **Déploiement via CI/CD :**
-   Les assets de production et dépendances sont automatiquement buildés par le pipeline Bitbucket :
-   - **Thème Timber** : `composer install --prefer-dist --no-dev --optimize-autoloader`
-   - **Thème Tiz** : `npm ci` puis `npm run build`
-   - Les artefacts optimisés sont prêts pour le déploiement
+2. **Deployment via CI/CD:**
+   Production assets and dependencies are automatically built by the Bitbucket pipeline:
+   - **Timber Theme**: `composer install --prefer-dist --no-dev --optimize-autoloader`
+   - **Tiz Theme**: `npm ci` then `npm run build`
+   - Optimized artifacts are ready for deployment
 
-3. **Démarrer le stack avec les assets de production :**
+3. **Start the stack with production assets:**
    ```bash
    docker compose up -d
    ```
+   The application will read configuration from the server's `.env` file.
 
-**⚠️ Important :** Ne pas lancer manuellement `composer install` ou `npm install/build` en production. Utiliser uniquement les artefacts générés par le CI/CD pour garantir la reproductibilité et l'optimisation.
-
-### Stopping the Stack
-
-```bash
-# Arrêt simple (conserve les données)
-docker compose down
-
-# Arrêt avec suppression des volumes (DESTRUCTIF)
-docker compose down -v
-```
-
-## 🔧 Services et Infrastructure
-
-### WordPress
-- **Port** : 8080
-- **Thèmes** : Montés depuis `wordpress/wp-content/themes/`
-- **Configuration** : Via variables d'environnement et `wp-config.php`
-- **Base de données** : MySQL
-
-### n8n (Automatisation)
-- **Port** : `${N8N_PORT}` (défaut: 5678)
-- **Base de données** : PostgreSQL
-- **Volume** : `n8n-data` pour la persistance des workflows
-- **Intégration** : Réception de webhooks depuis Contact Form 7
-
-### MySQL
-- **Rôle** : Base de données WordPress
-- **Configuration** : Credentials via `.env`
-- **Volume** : `db-data`
-
-### Redis
-- **Port** : `${REDIS_PORT}`
-- **Usage** : Cache, sessions, queues
-- **Volume** : `redis-data`
-
-### PostgreSQL
-- **Rôle** : Base de données pour n8n
-- **Volume** : `postgres-data`
-- **Configuration** : Automatique via Docker Compose
-
-### Qdrant
-- **Port** : `${QDRANT_PORT}` (défaut: 6333)
-- **Rôle** : Base de données vectorielle pour l'IA
-- **Volume** : `qdrant-data`
-- **API** : REST et gRPC disponibles
-
-## 💡 Conseils de Développement
-
-### Développement Local
-- Le répertoire `wordpress/` est monté dans le conteneur → modifications immédiates
-- Utiliser `docker compose exec wordpress bash` pour WP-CLI ou Composer dans le conteneur
-- Pour le thème Tiz : `npm run dev` active le watch mode + BrowserSync
-- BrowserSync proxy WordPress sur le port 3000 avec rechargement automatique
-
-### Debugging et Logs
-```bash
-# Logs d'un service spécifique
-docker compose logs -f wordpress
-docker compose logs -f n8n
-
-# Accès shell aux conteneurs
-docker compose exec wordpress bash
-docker compose exec postgres bash
-```
-
-### Workflows n8n Recommandés
-- **Contact Form → Email/Slack** : Traitement des soumissions de formulaires
-- **Content Indexing** : Synchronisation WordPress → Qdrant pour la recherche
-- **User Analytics** : Collecte et analyse des interactions utilisateurs
-- **Content Generation** : Intégration avec des APIs d'IA pour la génération de contenu
+**⚠️ Important:** 
+- Do not manually run `composer install` or `npm install/build` in production. Use only artifacts generated by CI/CD to ensure reproducibility and optimization.
+- Production runtime configuration (database credentials, API keys, URLs) should be in the server's `.env` file, not in Bitbucket variables.
 
 ## 🚀 CI/CD (Bitbucket Pipelines)
 
-**Configuration :** `bitbucket-pipelines.yml`
+**Configuration:** `bitbucket-pipelines.yml`
 
-### Étapes du Pipeline
+### Pipeline Steps
 
-1. **Build Timber Theme (Thème Parent)**
-   - Image : `composer:latest`
-   - Commandes : `composer install --prefer-dist --no-dev --optimize-autoloader`
-   - Répertoire : `timber-starter-theme`
-   - Résultat : Dépendances PHP optimisées pour la production
+1. **Build Timber Theme (Parent Theme)**
+   - Image: `composer:latest`
+   - Commands: `composer install --prefer-dist --no-dev --optimize-autoloader`
+   - Directory: `timber-starter-theme`
+   - Result: Optimized PHP dependencies for production
 
-2. **Build Tiz Theme (Thème Enfant)**
-   - Image : `node:22`
-   - Commandes : 
+2. **Build Tiz Theme (Child Theme)**
+   - Image: `node:22`
+   - Commands: 
      ```bash
      npm ci
      npm run build
      ```
-   - Répertoire : `tiz`
-   - Résultat : Assets front-end compilés, minifiés et optimisés
+   - Directory: `tiz`
+   - Result: Compiled, minified and optimized front-end assets
 
-3. **Artefacts de Déploiement**
-   - Dépendances PHP prêtes pour la production (sans dev-dependencies)
-   - Assets front-end optimisés dans le répertoire `dist/`
-   - Code source et configuration prêts pour le déploiement
-   - Tous les fichiers nécessaires packagés pour le serveur de production
+3. **Deployment Artifacts**
+   - PHP dependencies ready for production (without dev-dependencies)
+   - Optimized front-end assets in `dist/` directory
+   - Source code and configuration ready for deployment
+   - All necessary files packaged for production server
 
-### Variables d'Environnement (Bitbucket)
-Configurer dans les paramètres du repository :
-- `WORDPRESS_ENV=production` pour le build de production
-- Secrets de déploiement (clés SSH, tokens d'accès)
-- URLs de production et variables d'environnement
-- Clés API pour services externes (n8n, Qdrant, etc.)
 
-### Bonnes Pratiques CI/CD
-- **Automatisation complète** : Tous les builds sont gérés par le pipeline
-- **Reproductibilité** : Même environnement de build à chaque déploiement  
-- **Optimisation** : Assets minifiés et dépendances production-only
-- **Validation** : Tests automatiques avant déploiement
-- **Sécurité** : Variables sensibles stockées dans Bitbucket Pipelines
+### CI/CD Best Practices
+- **Complete automation**: All builds are managed by the pipeline
+- **Reproducibility**: Same build environment for every deployment
+- **Optimization**: Minified assets and production-only dependencies
+- **Validation**: Automatic tests before deployment
 
-## 🎨 Thèmes WordPress
+### Stopping the Stack
 
-### Timber Starter Theme (Thème Parent)
+```bash
+# Simple stop (preserves data)
+docker compose down
 
-**Localisation :** `wordpress/wp-content/themes/timber-starter-theme`
+# Stop with volume removal (DESTRUCTIVE)
+docker compose down -v
+```
 
-**Caractéristiques :**
-- **Thème parent** qui intègre le framework Timber pour utiliser **Twig** dans WordPress
-- Permet l'intégration de **librairies PHP supplémentaires** via **Composer**
-- Templates **Twig** pour une syntaxe moderne et sécurisée
-- Séparation claire entre logique PHP (`src/`) et templates (`views/`)
-- Tests unitaires intégrés avec PHPUnit
-- Architecture orientée objet avec classes personnalisées
+## 🔧 Services and Infrastructure
 
-**Ce que ce thème apporte :**
-- **Twig templating** : Syntaxe claire et sécurisée pour les templates
-- **Contexte structuré** : Organisation des données pour les vues
-- **Extensibilité** : Intégration facile de librairies PHP via Composer
-- **Performance** : Cache des templates Twig
-- **Sécurité** : Protection automatique contre les failles XSS
+### WordPress
+- **Port**: 8080
+- **Themes**: Mounted from `wordpress/wp-content/themes/`
+- **Configuration**: Via environment variables and `wp-config.php`
+- **Database**: MySQL
 
-**Structure :**
-- `src/StarterSite.php` : Classe principale du thème
-- `views/` : Templates Twig
-- `static/` : Assets statiques
-- `tests/` : Tests PHPUnit
-- `composer.json` : Dépendances PHP (Timber + librairies additionnelles)
+### n8n (Automation)
+- **Port**: `${N8N_PORT}` (default: 5678)
+- **Database**: PostgreSQL
+- **Volume**: `n8n-data` for workflow persistence
+- **Integration**: Webhook reception from Contact Form 7
 
-**Utilisation en développement :**
+### MySQL
+- **Role**: WordPress database
+- **Configuration**: Credentials via `.env`
+- **Volume**: `db-data`
+
+### Redis
+- **Port**: `${REDIS_PORT}`
+- **Usage**: Cache, sessions, queues
+- **Volume**: `redis-data`
+
+### PostgreSQL
+- **Role**: Database for n8n
+- **Volume**: `postgres-data`
+- **Configuration**: Automatic via Docker Compose
+
+### Qdrant
+- **Port**: `${QDRANT_PORT}` (default: 6333)
+- **Role**: Vector database for AI
+- **Volume**: `qdrant-data`
+- **API**: REST and gRPC available
+
+## 💡 Development Tips
+
+### Local Development
+- The `wordpress/` directory is mounted in the container → immediate modifications
+- Use `docker compose exec wordpress bash` for WP-CLI or Composer in the container
+- For Tiz theme: `npm run dev` activates watch mode + BrowserSync
+- BrowserSync proxies WordPress on port 3000 with automatic reload
+
+### Debugging and Logs
+```bash
+# Logs for a specific service
+docker compose logs -f wordpress
+docker compose logs -f n8n
+
+# Shell access to containers
+docker compose exec wordpress bash
+docker compose exec postgres bash
+```
+
+## 🎨 WordPress Themes
+
+### Timber Starter Theme (Parent Theme)
+
+**Location:** `wordpress/wp-content/themes/timber-starter-theme`
+
+**Features:**
+- **Parent theme** that integrates the Timber framework to use **Twig** in WordPress
+- Allows integration of **additional PHP libraries** via **Composer**
+- **Twig templates** for modern and secure syntax
+- Clear separation between PHP logic (`src/`) and templates (`views/`)
+- Integrated unit tests with PHPUnit
+- Object-oriented architecture with custom classes
+
+**What this theme provides:**
+- **Twig templating**: Clear and secure syntax for templates
+- **Structured context**: Data organization for views
+- **Extensibility**: Easy integration of PHP libraries via Composer
+- **Performance**: Twig template caching
+- **Security**: Automatic protection against XSS vulnerabilities
+
+**Structure:**
+- `src/StarterSite.php`: Main theme class
+- `views/`: Twig templates
+- `static/`: Static assets
+- `tests/`: PHPUnit tests
+- `composer.json`: PHP dependencies (Timber + additional libraries)
+
+**Development usage:**
 ```bash
 cd wordpress/wp-content/themes/timber-starter-theme
 composer install
 ```
 
-### Thème Tiz (Thème Enfant)
+### Tiz Theme (Child Theme)
 
-**Localisation :** `wordpress/wp-content/themes/tiz`
+**Location:** `wordpress/wp-content/themes/tiz`
 
-**Caractéristiques :**
-- **Thème enfant** du Timber Starter Theme
-- Hérite des fonctionnalités Timber/Twig du thème parent
-- Stack front-end moderne avec **Webpack 5**
-- **Tailwind CSS 4** pour le styling
-- **GSAP** pour les animations
-- **BrowserSync** pour le développement en temps réel
-- Build optimisé pour la production
+**Features:**
+- **Child theme** of Timber Starter Theme
+- Inherits Timber/Twig functionality from parent theme
+- Modern front-end stack with **Webpack 5**
+- **Tailwind CSS 4** for styling
+- **GSAP** for animations
+- **BrowserSync** for real-time development
+- Optimized build for production
 
-**Relation Parent/Enfant :**
-- Hérite automatiquement de toutes les fonctionnalités du thème parent Timber
-- Peut surcharger les templates Twig du parent si nécessaire
-- Accès à toutes les librairies PHP installées via Composer dans le thème parent
-- Combine les avantages de Timber/Twig avec un workflow front-end moderne
+**Parent/Child Relationship:**
+- Automatically inherits all features from Timber parent theme
+- Can override parent Twig templates if necessary
+- Access to all PHP libraries installed via Composer in parent theme
+- Combines Timber/Twig advantages with modern front-end workflow
 
-**Fonctionnalités avancées :**
-- Intégration **Contact Form 7** avec webhooks personnalisés
-- Système de Custom Post Types
-- Assets conditionnels selon l'environnement :
-  - Développement : `dev_build/` (hot reload)
-  - Production : `dist/` (optimisé et minifié)
+**Advanced Features:**
+- **Contact Form 7** integration with custom webhooks
+- Custom Post Types system
+- Conditional assets based on environment:
+  - Development: `dev_build/` (hot reload)
+  - Production: `dist/` (optimized and minified)
 
-**Scripts disponibles :**
+**Available Scripts:**
 ```bash
-npm run dev      # Mode développement avec watch et BrowserSync
-npm run build    # Build de production optimisé
+npm run dev      # Development mode with watch and BrowserSync
+npm run build    # Optimized production build
 ```
 
-**Architecture des assets :**
-- Mode développement : Webpack watch + BrowserSync sur port 3000
-- Mode production : Assets minifiés et optimisés dans `dist/`
+**Asset Architecture:**
+- Development mode: Webpack watch + BrowserSync on port 3000
+- Production mode: Minified and optimized assets in `dist/`
 
-## 🔗 Intégration Contact Form 7 ↔ n8n
+## 🔗 Contact Form 7 ↔ n8n Integration
 
-Le thème Tiz inclut un système personnalisé de webhooks pour Contact Form 7 qui permet une intégration transparente avec n8n.
+The Tiz theme includes a custom webhook system for Contact Form 7 that enables seamless integration with n8n.
 
-### Fonctionnalités
+### Features
 
-**Custom Post Type "Webhooks CF7" :**
-- Interface d'administration pour mapper les formulaires CF7 à des URLs de webhook
-- Configuration par formulaire de l'URL de destination n8n
-- Gestion automatique de l'envoi des données
+**Custom Post Type "CF7 Webhooks":**
+- Admin interface to map CF7 forms to webhook URLs
+- Per-form configuration of n8n destination URL
+- Automatic data sending management
 
-**Processus d'intégration :**
-1. **Configuration** : Dans l'admin WordPress, créer un "Webhook CF7" et associer un formulaire CF7 à une URL n8n
-2. **Soumission** : Quand le formulaire est soumis, les emails CF7 sont désactivés
-3. **Webhook** : Les données sont automatiquement POSTées en JSON vers n8n
-4. **Réponse** : Le statut de réussite/échec est affiché à l'utilisateur
+**Integration Process:**
+1. **Configuration**: In WordPress admin, create a "CF7 Webhook" and associate a CF7 form with an n8n URL
+2. **Submission**: When the form is submitted, CF7 emails are disabled
+3. **Webhook**: Data is automatically POSTed as JSON to n8n
+4. **Response**: Success/failure status is displayed to the user
 
-### Configuration n8n
+### n8n Configuration
 
-1. **Webhook n8n** : Créer un workflow n8n avec un trigger "Webhook"
-2. **URL de webhook** : Copier l'URL générée dans l'interface "Webhooks CF7"
-3. **Traitement** : Configurer le workflow n8n pour traiter les données reçues
-4. **Réponse** : n8n doit répondre avec `{"ok": true}` pour confirmer la réception
+1. **n8n Webhook**: Create an n8n workflow with a "Webhook" trigger
+2. **Webhook URL**: Copy the generated URL into the "CF7 Webhooks" interface
+3. **Processing**: Configure the n8n workflow to process received data
+4. **Response**: n8n must respond with `{"ok": true}` to confirm reception
 
-## 🗄️ Services de Données pour n8n
+## 🗄️ Data Services for n8n
 
 ### PostgreSQL
-- **Rôle** : Base de données principale pour n8n
-- **Configuration** : Automatiquement configurée via variables d'environnement
-- **Persistance** : Volume Docker `postgres-data`
+- **Role**: Main database for n8n
+- **Configuration**: Automatically configured via environment variables
+- **Persistence**: Docker volume `postgres-data`
 
-### Qdrant (Base de Données Vectorielle)
-- **Rôle** : Stockage et recherche de vecteurs pour l'IA/ML
-- **Port** : Configurable via `${QDRANT_PORT}` (défaut: 6333)
-- **Utilisation** : Parfait pour les workflows n8n impliquant :
-  - Recherche sémantique
-  - Recommandations
-  - Classification de texte
+### Qdrant (Vector Database)
+- **Role**: Vector storage and search for AI/ML
+- **Port**: Configurable via `${QDRANT_PORT}` (default: 6333)
+- **Usage**: Perfect for n8n workflows involving:
+  - Semantic search
+  - Recommendations
+  - Text classification
   - RAG (Retrieval Augmented Generation)
 
-**Exemple d'utilisation avec n8n :**
-- Embedding de contenu WordPress dans Qdrant
-- Recherche sémantique de contenus similaires
-- Système de recommandations basé sur les interactions utilisateurs
+**Example usage with n8n:**
+- WordPress content embedding in Qdrant
+- Semantic search for similar content
+- Recommendation system based on user interactions
 
-## Local Development Tips
+---
 
-- The entire `wordpress/` directory is mounted into the WordPress container, so local edits are reflected immediately.
-- Use `docker compose exec wordpress bash` to run Composer commands or WP-CLI inside the container if needed.
-- For front-end development on `tiz`, run `npm run dev` locally (after `npm install`) to watch and rebuild assets into `dev_build/`.
-- When preparing a release, set `WORDPRESS_ENV=production` and run `npm run build` to refresh `dist/` assets used in production.
+## 📁 Volumes and Persistence
 
-## CI/CD (Bitbucket Pipelines)
+The stack uses named Docker volumes for data persistence:
 
-- Defined in `bitbucket-pipelines.yml`.
-- Step 1: installs Composer dependencies inside `timber-starter-theme` using the official Composer image.
-- Step 2: installs Node dependencies and builds assets for `tiz` using Node 22.
-- Built artifacts are stored as pipeline artifacts for deployment or further stages.
-- Configure repository variables in Bitbucket for any secrets required during deploy stages.
+- `db-data`: MySQL data (WordPress)
+- `postgres-data`: PostgreSQL data (n8n)
+- `redis-data`: Redis cache
+- `qdrant-data`: Qdrant collections and indexes
+- `n8n-data`: n8n workflows and configuration
 
-## 📁 Volumes et Persistance
-
-Le stack utilise des volumes nommés Docker pour la persistance des données :
-
-- `db-data` : Données MySQL (WordPress)
-- `postgres-data` : Données PostgreSQL (n8n)
-- `redis-data` : Cache Redis
-- `qdrant-data` : Collections et index Qdrant
-- `n8n-data` : Workflows et configuration n8n
-
-**⚠️ Attention :** La suppression des volumes efface définitivement les données persistées.
+**⚠️ Warning:** Deleting volumes permanently erases persisted data.
 
 ```bash
-# Arrêter et supprimer les volumes (DESTRUCTIF)
+# Stop and remove volumes (DESTRUCTIVE)
 docker compose down -v
 
-# Arrêt simple (conserve les données)
+# Simple stop (preserves data)
 docker compose down
 ```
 
-## 🛠️ Dépannage
+## 🛠️ Troubleshooting
 
-### Problèmes Courants
+### Common Issues
 
-**Ports déjà utilisés :**
-- Vérifier que les ports définis dans `.env` sont libres
-- Modifier les ports dans `.env` si nécessaire
+**Ports already in use:**
+- Check that ports defined in `.env` are free
+- Modify ports in `.env` if necessary
 
-**Échec des dépendances en CI :**
-- Vérifier la présence de `composer.lock` et `package-lock.json`
-- S'assurer que les répertoires de cache sont accessibles en écriture
+**CI dependency failures:**
+- Verify presence of `composer.lock` and `package-lock.json`
+- Ensure cache directories are writable
 
-**Problèmes de conteneurs :**
+**Container issues:**
 ```bash
-# Vérifier les logs d'un service
+# Check logs for a specific service
 docker compose logs -f <service>
 
-# Redémarrer un service spécifique
+# Restart a specific service
 docker compose restart <service>
 
-# Reconstruire les images
+# Rebuild images
 docker compose build --no-cache
 ```
 
-**Webhooks CF7 → n8n :**
-- Vérifier que l'URL n8n est accessible depuis WordPress
-- Contrôler les logs WordPress : `/wp-content/debug.log`
-- Vérifier que n8n répond bien avec `{"ok": true}`
+**CF7 → n8n webhooks:**
+- Verify that n8n URL is accessible from WordPress
+- Check WordPress logs: `/wp-content/debug.log`
+- Verify that n8n responds with `{"ok": true}`
 
-### Debugging n8n
-- Interface web : http://localhost:5678
-- Logs en temps réel : `docker compose logs -f n8n`
-- Test de webhooks : utiliser l'outil de test intégré n8n
+### n8n Debugging
+- Web interface: http://localhost:5678
+- Real-time logs: `docker compose logs -f n8n`
+- Webhook testing: use n8n's built-in test tool
 
-### Performance et Optimisation
-- **Redis** : Activer le cache d'objets WordPress
-- **Qdrant** : Optimiser la taille des collections selon vos données
-- **MySQL** : Ajuster `innodb_buffer_pool_size` pour de gros volumes
+### Performance and Optimization
+- **Redis**: Enable WordPress object cache
+- **Qdrant**: Optimize collection size according to your data
+- **MySQL**: Adjust `innodb_buffer_pool_size` for large volumes
 
-## 📝 Notes Techniques
+## 📝 Technical Notes
 
-### Sécurité
-- Changer tous les mots de passe par défaut en production
-- Utiliser HTTPS en production
-- Limiter l'accès aux ports de services (PostgreSQL, Redis, etc.)
+### Security
+- Change all default passwords in production
+- Use HTTPS in production
+- Limit access to service ports (PostgreSQL, Redis, etc.)
 
 ### Backup
-- Sauvegarder régulièrement les volumes Docker
-- Exporter les workflows n8n depuis l'interface
-- Sauvegarder la base de données WordPress
+- Regularly backup Docker volumes
+- Export n8n workflows from the interface
+- Backup WordPress database
 
 ### Monitoring
-- Surveiller les logs Docker Compose
-- Monitorer l'usage des ressources des conteneurs
-- Vérifier la santé des webhooks n8n régulièrement
+- Monitor Docker Compose logs
+- Monitor container resource usage
+- Regularly check n8n webhook health
