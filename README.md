@@ -78,22 +78,18 @@ Ce repository contient un stack WordPress complet basé sur Docker avec des serv
    WORDPRESS_ENV=production
    ```
 
-2. **Build des assets de production :**
-   ```bash
-   # Thème Timber
-   cd wordpress/wp-content/themes/timber-starter-theme
-   composer install --prefer-dist --no-dev --optimize-autoloader
-   
-   # Thème Tiz
-   cd ../tiz
-   npm ci --only=production
-   npm run build
-   ```
+2. **Déploiement via CI/CD :**
+   Les assets de production et dépendances sont automatiquement buildés par le pipeline Bitbucket :
+   - **Thème Timber** : `composer install --prefer-dist --no-dev --optimize-autoloader`
+   - **Thème Tiz** : `npm ci` puis `npm run build`
+   - Les artefacts optimisés sont prêts pour le déploiement
 
-3. **Démarrer le stack :**
+3. **Démarrer le stack avec les assets de production :**
    ```bash
    docker compose up -d
    ```
+
+**⚠️ Important :** Ne pas lancer manuellement `composer install` ou `npm install/build` en production. Utiliser uniquement les artefacts générés par le CI/CD pour garantir la reproductibilité et l'optimisation.
 
 ### Stopping the Stack
 
@@ -171,12 +167,13 @@ docker compose exec postgres bash
 
 ### Étapes du Pipeline
 
-1. **Build Timber Theme**
+1. **Build Timber Theme (Thème Parent)**
    - Image : `composer:latest`
    - Commandes : `composer install --prefer-dist --no-dev --optimize-autoloader`
    - Répertoire : `timber-starter-theme`
+   - Résultat : Dépendances PHP optimisées pour la production
 
-2. **Build Tiz Theme**
+2. **Build Tiz Theme (Thème Enfant)**
    - Image : `node:22`
    - Commandes : 
      ```bash
@@ -184,17 +181,27 @@ docker compose exec postgres bash
      npm run build
      ```
    - Répertoire : `tiz`
+   - Résultat : Assets front-end compilés, minifiés et optimisés
 
-3. **Artefacts**
-   - Dépendances PHP optimisées
-   - Assets front-end compilés et minifiés
-   - Prêt pour déploiement
+3. **Artefacts de Déploiement**
+   - Dépendances PHP prêtes pour la production (sans dev-dependencies)
+   - Assets front-end optimisés dans le répertoire `dist/`
+   - Code source et configuration prêts pour le déploiement
+   - Tous les fichiers nécessaires packagés pour le serveur de production
 
 ### Variables d'Environnement (Bitbucket)
 Configurer dans les paramètres du repository :
-- Secrets de déploiement
-- URLs de production
-- Clés API pour services externes
+- `WORDPRESS_ENV=production` pour le build de production
+- Secrets de déploiement (clés SSH, tokens d'accès)
+- URLs de production et variables d'environnement
+- Clés API pour services externes (n8n, Qdrant, etc.)
+
+### Bonnes Pratiques CI/CD
+- **Automatisation complète** : Tous les builds sont gérés par le pipeline
+- **Reproductibilité** : Même environnement de build à chaque déploiement  
+- **Optimisation** : Assets minifiés et dépendances production-only
+- **Validation** : Tests automatiques avant déploiement
+- **Sécurité** : Variables sensibles stockées dans Bitbucket Pipelines
 
 ## 🎨 Thèmes WordPress
 
