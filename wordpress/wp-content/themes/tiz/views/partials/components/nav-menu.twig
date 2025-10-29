@@ -1,0 +1,121 @@
+{# Reusable Navigation Menu
+Inputs:
+- menu: a Timber\Menu or object with `items` and each item has { title, link, children }
+- align: 'left' | 'center' | 'right' (optional, default: 'left')
+- item_classes: extra classes for top-level <a>
+- underline: boolean to show underline hover effect (default: true)
+#}
+{% if menu and menu.items %}
+  {% set align = align|default('left') %}
+  {% set container_align = {
+    'left': 'justify-start',
+    'center': 'justify-center',
+    'right': 'justify-end'
+  }[align] %}
+
+  {% macro chevron_down() %}
+    <svg class="ml-1 w-3.5 h-3.5 text-bay-of-many-900/80 group-hover:text-bay-of-many-900 transition duration-500 ease-out transform-gpu rotate-0 group-hover:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+    </svg>
+  {% endmacro %}
+
+  {% macro get_icon(classes) %}
+    {% set theme_uri = function('get_stylesheet_directory_uri') %}
+    {% set icon_map = {
+      'picto-1': theme_uri ~ '/assets/images/picto-1.webp',
+      'picto-2': theme_uri ~ '/assets/images/picto-2.webp',
+      'picto-3': theme_uri ~ '/assets/images/picto-3.webp',
+      'picto-4': theme_uri ~ '/assets/images/picto-4.webp',
+      'picto-5': theme_uri ~ '/assets/images/picto-5.webp',
+      'picto-6': theme_uri ~ '/assets/images/picto-6.webp',
+      'picto-7': theme_uri ~ '/assets/images/picto-7.webp',
+      'picto-8': theme_uri ~ '/assets/images/picto-8.webp',
+      'picto-9': theme_uri ~ '/assets/images/picto-9.webp',
+      'picto-10': theme_uri ~ '/assets/images/picto-10.webp'
+    } %}
+    {% for cls in classes %}
+      {% if icon_map[cls] is defined %}
+        <img src="{{ icon_map[cls] }}" alt="" class="w-8 h-8 mr-3 flex-shrink-0 object-contain" loading="lazy" />
+      {% endif %}
+    {% endfor %}
+  {% endmacro %}
+
+  {% macro item_link(item, isTop, extra) %}
+    {% set underline = extra.underline is not defined ? true : extra.underline %}
+    {% set activeUnderline = extra.activeUnderline|default(false) %}
+    {% set isExact = extra.isExact|default(false) %}
+    {% set showIcon = extra.showIcon|default(false) %}
+    {% set base = 'relative inline-flex items-center py-2 text-bay-of-many-900/90 text-lg font-medium  tracking-wide hover:text-bay-of-many-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dodger-blue-600' %}
+    {% set spacing = isTop ? 'px-1' : 'px-3' %}
+    {% set deco = '' %}
+    {% if underline and isTop %}
+      {% set deco = 'after:absolute after:left-0 after:bottom-[0.75rem] after:h-[1px] after:bg-bay-of-many-900 ' ~ (activeUnderline ? 'after:w-full' : 'after:w-0 hover:after:w-full') ~ ' after:transition-all after:duration-300' %}
+    {% endif %}
+    <a href="{{ item.link }}" class="{{ base }} {{ spacing }} {{ deco }} {{ isExact ? 'pointer-events-none' : '' }}" {{ isExact ? 'aria-current="page"' : '' }}>
+      {% if showIcon %}{{ _self.get_icon(item.classes|default([])) }}{% endif %}{{ item.title }}
+    </a>
+  {% endmacro %}
+
+  {% macro render_items(items, level, underline) %}
+    {% import _self as self %}
+    {% if level == 0 %}
+      <ul class="hidden xl:flex {{ container_align|default('') }} items-center gap-8">
+        {% for item in items %}
+
+          {% set has_children = item.children and item.children|length %}
+          {% set classes = item.classes|default([]) %}
+          {% set is_exact_top = (item.current is defined and item.current) or ('current-menu-item' in classes) %}
+          {% set is_ancestor_top = ('current-menu-ancestor' in classes) or ('current-menu-parent' in classes) %}
+          <li class="relative group">
+            <div class="flex items-center">
+              {{ self.item_link(item, true, { underline: underline, activeUnderline: (is_exact_top or is_ancestor_top), isExact: is_exact_top }) }}
+              {% if has_children %}{{ self.chevron_down() }}{% endif %}
+            </div>
+            {% if has_children %}
+              <div class="absolute overflow-hidden left-0 top-full min-w-96 rounded-tiz bg-white shadow-lg ring-1 ring-black/5 opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition duration-200">
+                <ul class="">
+                  {% for child in item.children %}
+                    {% set child_has = child.children and child.children|length %}
+                    {% set child_classes = child.classes|default([]) %}
+                    {% set is_exact_child = (child.current is defined and child.current) or ('current-menu-item' in child_classes) %}
+                    <li class="group relative border-b border-bay-of-many-900/10 hover:bg-black-haze-50 transition duration-500 {{ is_exact_child ? 'bg-black-haze-50' : '' }}">
+                      <div class="flex items-center py-2 ">
+
+                        {{ self.item_link(child, false, { underline: false, activeUnderline: false, isExact: is_exact_child, showIcon: true }) }}
+                        {% if child_has %}
+                          <svg class="ml-1 w-3.5 h-3.5 text-bay-of-many-900/70" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01-.02-1.06L10.94 10 7.19 6.29a.75.75 0 111.06-1.06l4.24 4.24a.75.75 0 010 1.06l-4.24 4.24a.75.75 0 01-1.04 0z" clip-rule="evenodd" />
+                          </svg>
+                        {% endif %}
+                      </div>
+                      {% if child_has %}
+                        <div class="absolute left-full top-0 ml-2 min-w-[220px] rounded-tiz bg-white shadow-lg ring-1 ring-black/5 p-2 hidden group-hover:block">
+                          {{ self.render_items(child.children, level + 2, false) }}
+                        </div>
+                      {% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <ul class="flex flex-col gap-1">
+        {% for item in items %}
+          {% set classes = item.classes|default([]) %}
+          {% set is_exact_nested = (item.current is defined and item.current) or ('current-menu-item' in classes) %}
+          <li>
+            {{ self.item_link(item, false, { underline: false, activeUnderline: false, isExact: is_exact_nested }) }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endmacro %}
+
+  {% import _self as self %}
+  <nav class="hidden md:block" aria-label="Navigation principale">
+    {{ self.render_items(menu.items, 0, true) }}
+  </nav>
+{% endif %}

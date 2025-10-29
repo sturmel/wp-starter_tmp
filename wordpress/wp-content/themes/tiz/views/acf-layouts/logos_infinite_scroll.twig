@@ -1,0 +1,53 @@
+{# Logos - défilement infini #}
+{% set speed = section.speed|default(20) %}
+{% set bg = section.background_color|default('') %}
+{% set logos = section.logos|default([]) %}
+{% set heading = section.heading|default('') %}
+{% set description = section.description|default('') %}
+{% set primary_button = section.primary_button|default(null) %}
+{% set secondary_button = section.secondary_button|default(null) %}
+{% set is_class = bg starts with 'bg-' %}
+{% set bg_style = (bg and not is_class) ? 'background-color: ' ~ bg : '' %}
+{% if logos|length > 0 %}
+	<section class="py-12 md:py-24 {{ is_class ? bg : '' }}" {% if bg_style %} style="{{ bg_style }}" {% endif %}>
+		<div class="container mx-auto mb-14 px-6 lg:px-2">
+			<h2 class="scroll-animate {{ title_classes|default('text-4xl md:text-5xl text-bay-of-many-900') }} [&>span]:text-dodger-blue-600 [&>span]:font-semibold">{{ heading }}</h2>
+		</div>
+		<div class="overflow-hidden scroll-animate">
+			<div class="logo flex items-center will-change-transform" data-speed="{{ speed }}">
+				<ul class="flex items-center gap-16 shrink-0 will-change-transform" data-base-count="{{ logos|length }}">
+					{% for item in logos %}
+						<li
+							class="group">
+							{# Construire un libellé accessible pour le lien #}
+							{% set label = item.image.alt|default('') %}
+							{% if label is empty %}
+								{% set label = item.image.title|default('') %}
+							{% endif %}
+							{% if label is empty %}
+								{% set domain = item.url|default('')|replace({'https://':'','http://':'','www.':''})|split('/')|first %}
+								{% set label = domain|default('Lien') %}
+							{% endif %}
+
+							{# Construire rel selon target #}
+							{% set rel = 'nofollow' %}
+							{% if item.new_tab %}
+								{% set rel = rel ~ ' noopener noreferrer' %}
+							{% endif %}
+
+							{% set linkAttrs = {
+							href: item.url|default('#'),
+							rel: rel,
+							target: item.new_tab ? '_blank' : null,
+							'aria-label': label
+						} %}
+							<a {% for k,v in linkAttrs %} {% if v %} {{ k }}="{{ v }}" {% endif %} {% endfor %} class="block opacity-70 hover:opacity-100 transition-opacity duration-500 ease-out">
+								{% include 'partials/components/acf-image.twig' with { image: item.image, class: 'h-auto max-h-[75px] w-auto max-w-[200px] object-contain transition duration-500 ease-out', size: 'medium', alt: label } %}
+							</a>
+						</li>
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+	</section>
+{% endif %}

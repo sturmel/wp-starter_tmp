@@ -1,0 +1,43 @@
+{# Composant image ACF réutilisable avec responsive et lazy loading #}
+
+{% if image %}
+    {% set img_class = class|default('') %}
+    {% set img_alt = alt|default(image.alt|default('')) %}
+    {% set img_loading = loading|default('lazy') %}
+    {% set img_fetchpriority = fetchpriority|default(null) %}
+    {% set img_decoding = decoding|default('async') %}
+    {% set img_size = size|default('large') %}
+    
+    {# Utiliser la taille demandée ou l'URL originale en fallback #}
+    {% set img_src = image.sizes[img_size]|default(image.url) %}
+    {% set img_srcset = '' %}
+    
+    {# Construire le srcset si disponible avec validation des largeurs #}
+    {% if image.sizes %}
+        {% set srcset_parts = [] %}
+        {% for size_name, size_url in image.sizes %}
+            {% if size_url and not (size_name ends with '-width' or size_name ends with '-height') %}
+                {% set width_key = size_name ~ '-width' %}
+                {% set width_value = image.sizes[width_key]|default(0) %}
+                {% if width_value > 1 %}
+                    {% set srcset_parts = srcset_parts|merge([size_url ~ ' ' ~ width_value ~ 'w']) %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if srcset_parts|length > 0 %}
+            {% set img_srcset = srcset_parts|join(', ') %}
+        {% endif %}
+    {% endif %}
+
+    <img src="{{ img_src }}" 
+         alt="{{ img_alt }}"
+         class="{{ img_class }}"
+         loading="{{ img_loading }}"
+         decoding="{{ img_decoding }}"
+         {% if img_fetchpriority %}fetchpriority="{{ img_fetchpriority }}"{% endif %}
+         {% if img_srcset %}srcset="{{ img_srcset }}"{% endif %}
+         {% if image.width and image.height and image.width > 1 and image.height > 1 %}
+             width="{{ image.width }}" 
+             height="{{ image.height }}"
+         {% endif %}>
+{% endif %}

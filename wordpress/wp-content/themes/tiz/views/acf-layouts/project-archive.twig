@@ -1,0 +1,150 @@
+{# Layout: Projets – Archive #}
+{% set heading = section.heading %}
+{% set description = section.description %}
+{% set ppp = section.posts_per_page|default(9) %}
+{% set orderby = 'date' %}
+{% set order = 'DESC' %}
+{% set enable_search = true %}
+{% set enable_filter = true %}
+{% set filter_style = 'dropdown' %}
+{% set pagination = 'links' %}
+
+<section class="acf-project-archive py-12 md:py-20 px-6 lg:px-2">
+  <div class="container mx-auto">
+    {% include 'partials/components/section-header.twig' with {
+      title: heading,
+      description: description,
+      context: 'default',
+      align: 'left',
+      container_classes: 'flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6'
+    } %}
+
+    {# Read current query vars via WP query_vars (registered in theme) #}
+    {% set q = function('get_query_var', 'q')|default('') %}
+    {% set pg = function('get_query_var', 'pg') %}
+    {% if pg is empty %}{% set pg = 1 %}{% endif %}
+    {% set pg = function('intval', pg) %}
+    {% if pg < 1 %}{% set pg = 1 %}{% endif %}
+    {% set selected_tax = function('get_query_var', 'expertise') %}
+    {% if selected_tax and selected_tax is not iterable %}
+      {% set selected_tax = [selected_tax] %}
+    {% endif %}
+
+    {# Controls: search and filters #}
+    <form method="get" class="mb-6 flex flex-wrap items-center gap-4">
+      {# Unify control height with h-11 (approx 44px) #}
+      <input type="search" name="q" value="{{ q }}" placeholder="Rechercher un projet" class="scroll-animate w-full md:w-1/2 h-11 rounded-tiz border border-wild-blue-yonder-300 px-4 text-bay-of-many-900 bg-white outline-none focus:ring-2 focus:ring-dodger-blue-500" />
+
+      {% set all_terms = function('get_terms', { taxonomy: 'expertise', hide_empty: false }) %}
+      <select name="expertise" class="scroll-animate min-w-56 h-11 rounded-tiz border border-wild-blue-yonder-300 px-4 text-bay-of-many-900 bg-white outline-none focus:ring-2 focus:ring-dodger-blue-500">
+        <option value="">Toutes les expertises</option>
+        {% for term in all_terms %}
+          <option value="{{ term.slug }}" {{ selected_tax and term.slug in selected_tax ? 'selected' : '' }}>{{ term.name }}</option>
+        {% endfor %}
+      </select>
+
+      {# Button styled like components/button.twig (primary, default context) #}
+      <button type="submit" class="scroll-animate cursor-pointer ml-auto animate-button inline-block px-6 py-3 rounded-full shadow transition duration-500 font-semibold uppercase text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dodger-blue-600 bg-dodger-blue-700 text-white hover:bg-dodger-blue-800 " style="text-shadow: 0 1px 1px rgba(0,0,0,0.25);">Appliquer</button>
+    </form>
+
+    {# Build query via get_posts (simple & reliable in Twig) #}
+    {% set tax_query = [] %}
+    {% if selected_tax and selected_tax|length %}
+      {% set tax_query = [{ taxonomy: 'expertise', field: 'slug', terms: selected_tax }] %}
+    {% endif %}
+
+    {% set posts = function('get_posts', {
+      post_type: 'project',
+      post_status: 'publish',
+      s: q,
+      orderby: orderby,
+      order: order,
+      posts_per_page: ppp,
+      paged: pg,
+      tax_query: tax_query,
+      suppress_filters: true
+    }) %}
+
+    {% set items = [] %}
+    {% for p in posts %}
+      {% set pid = p.ID %}
+      {# Prefer ACF image; fallback to featured image URL #}
+      {% set acf_image = function('get_field', 'image', pid) %}
+      {% if acf_image %}
+        {% set image = acf_image %}
+      {% else %}
+        {% set thumb_id = function('get_post_thumbnail_id', pid) %}
+        {% set src = thumb_id ? function('wp_get_attachment_image_url', thumb_id, 'large') : '' %}
+        {% set alt = thumb_id ? function('get_post_meta', thumb_id, '_wp_attachment_image_alt', true) : p.post_title %}
+        {% set image = src ? { ID: thumb_id, url: src, alt: alt, sizes: { large: src } } : null %}
+      {% endif %}
+
+      {% set desc = function('get_field', 'description', pid) ?: function('get_the_excerpt', p) %}
+
+      {# Tags: first three from ACF repeater, color from term ACF #}
+      {% set rows = function('get_field', 'expertises', pid) ?: [] %}
+      {% set ids = [] %}
+      {% for row in rows %}
+        {% if row.expertise %}
+          {% set ids = ids|merge([row.expertise]) %}
+        {% endif %}
+      {% endfor %}
+      {% set ids = ids[:3] %}
+      {% set tag_items = [] %}
+      {% if ids %}
+        {% for tid in ids %}
+          {% set term = function('get_term', tid, 'expertise') %}
+          {% if term %}
+            {# Use ACF term meta 'page' (field_expertise_page) for tag link; omit if empty #}
+            {% set page_link = function('get_field', 'page', 'expertise_' ~ term.term_id) %}
+            {% set color = function('get_field', 'color', 'expertise_' ~ term.term_id) %}
+            {% set tag_items = tag_items|merge([{ label: term.name, link: page_link|default(null), color: color }]) %}
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        {% set terms = function('get_the_terms', pid, 'expertise') ?: [] %}
+        {% for t in terms[:3] %}
+          {% set page_link = function('get_field', 'page', 'expertise_' ~ t.term_id) %}
+          {% set color = function('get_field', 'color', 'expertise_' ~ t.term_id) %}
+          {% set tag_items = tag_items|merge([{ label: t.name, link: page_link|default(null), color: color }]) %}
+        {% endfor %}
+      {% endif %}
+
+      {% set items = items|merge([{
+        image: image,
+        title: p.post_title,
+        text: desc,
+        client: function('get_field', 'clients', pid),
+        link: function('get_permalink', pid),
+        tags: tag_items
+      }]) %}
+    {% endfor %}
+
+    {# Count for pagination only (not displayed) #}
+    {% set count_args = {
+      post_type: 'project', post_status: 'publish', s: q, orderby: orderby, order: order, tax_query: tax_query, posts_per_page: -1, fields: 'ids'
+    } %}
+    {% set all_ids = function('get_posts', count_args) %}
+    {% set total_posts = all_ids|length %}
+
+    {% if items|length %}
+      {% include 'partials/components/cards/projet.twig' with { items: items } %}
+    {% else %}
+      <p class="text-wild-blue-yonder-600">Aucun projet à afficher.</p>
+    {% endif %}
+
+    {# Pagination (links) -> use reusable component #}
+    {% set base_url = function('get_permalink') %}
+    {% set params = { 'q': q } %}
+    {% if selected_tax and selected_tax|length %}
+      {% set params = params|merge({ 'expertise': selected_tax }) %}
+    {% endif %}
+    {% set total_pages = (total_posts / ppp)|round(0, 'ceil') %}
+    {% include 'partials/components/pagination.twig' with {
+      base_url: base_url,
+      current: pg,
+      total_pages: total_pages,
+      params: params
+    } %}
+  </div>
+</section>

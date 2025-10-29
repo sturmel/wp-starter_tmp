@@ -1,0 +1,23 @@
+{# /partials/lightbox.twig #}
+{# Lightbox pour voir l'image en plein écran (placé à la racine pour un z-index correct) #}
+<div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] opacity-0 invisible transition-all duration-300" 
+    data-lightbox-overlay>
+    
+    {# Bouton fermer #}
+    <button class="absolute top-6 right-6 bg-black/50 hover:bg-black/70 p-2 transition-all duration-200 z-50 cursor-pointer" 
+            data-lightbox-close
+            title="Fermer">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+    </button>
+    
+    {# Container de l'image #}
+    <div class="w-full h-full flex items-center justify-center p-8">
+        <img src="" 
+             alt=""
+             class="max-w-[95vw] max-h-[85vh] object-contain shadow-2xl opacity-0 transition-opacity duration-300"
+             data-lightbox-image />
+    </div>
+    
+</div>

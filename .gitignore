@@ -1,0 +1,29 @@
+.env
+
+# Keep wp-content tracked except for specific files/dirs below
+wordpress/wp-content/object-cache.php
+wordpress/wp-content/uploads/
+wordpress/wp-content/cache/
+wordpress/wp-content/debug.log
+wordpress/wp-content/upgrade/
+wordpress/wp-content/backup-db/
+wordpress/wp-content/backups/
+wordpress/wp-content/blogs.dir/
+wordpress/wp-content/updraft/
+
+# Wordfence litespeed
+wordpress/wp-content/litespeed/
+
+# Ignore build / vendor artifacts inside themes (but not theme source)
+wordpress/wp-content/themes/*/node_modules/
+wordpress/wp-content/themes/*/package-lock.json
+wordpress/wp-content/themes/*/dist/
+wordpress/wp-content/themes/*/dev_build/
+db_data/
+backups/
+n8n-data/
+qdrant-data/
+postgres-data/
+wordpress/.htaccess
+
+

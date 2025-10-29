@@ -1,0 +1,110 @@
+{# Project section: header + latest 3 projects or selected ones #}
+{% set heading = section.heading %}
+{% set description = section.description %}
+{% set primary_button = section.primary_button %}
+{% set secondary_button = section.secondary_button %}
+{% set display_latest = (section.display_latest is defined ? section.display_latest : true) %}
+{% set selected = section.selected_projects|default([]) %}
+{% set bg = section.background_color|default('') %}
+{% set is_class = bg starts with 'bg-' %}
+{% set bg_style = (bg and not is_class) ? 'background-color: ' ~ bg : '' %}
+{% set cards_bg_color = section.cards_bg_color|default('') %}
+
+<section class="py-12 md:py-20 px-6 lg:px-2 {{ is_class ? bg : '' }}" {% if bg_style %}style="{{ bg_style }}"{% endif %}>
+  <div class="container mx-auto">
+    {% include 'partials/components/section-header.twig' with {
+      title: heading,
+      description: description,
+      primary_button: primary_button,
+      secondary_button: secondary_button,
+      context: 'default',
+      align: 'left',
+      container_classes: 'flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6'
+    } %}
+
+    {% set items = [] %}
+
+    {% if display_latest %}
+      {% set posts = function('get_posts', {
+        post_type: 'project',
+        post_status: 'publish',
+        numberposts: 3,
+        orderby: 'date',
+        order: 'DESC'
+      }) %}
+    {% else %}
+      {% set posts = [] %}
+      {% for pid in selected %}
+        {% set p = function('get_post', pid) %}
+        {% set posts = posts|merge([p]) %}
+      {% endfor %}
+    {% endif %}
+
+    {% if posts and posts|length %}
+      {% for p in posts %}
+        {% set pid = p.ID %}
+        {# Prefer the project ACF image field; fallback to post thumbnail #}
+        {% set acf_image = function('get_field', 'image', pid) %}
+        {% if acf_image %}
+          {% set image = acf_image %}
+        {% else %}
+          {% set thumb_id = function('get_post_thumbnail_id', pid) %}
+          {% set src = thumb_id ? function('wp_get_attachment_image_url', thumb_id, 'large') : '' %}
+          {% set alt = thumb_id ? function('get_post_meta', thumb_id, '_wp_attachment_image_alt', true) : p.post_title %}
+          {% set image = src ? { ID: thumb_id, url: src, alt: alt, sizes: { large: src } } : null %}
+        {% endif %}
+
+        {# Description from ACF (project description), fallback to excerpt #}
+        {% set desc = function('get_field', 'description', pid) %}
+        {% if not desc %}
+          {% set desc = function('get_the_excerpt', p) %}
+        {% endif %}
+
+        {# Tags: take first 3 from ordered ACF ‘expertises’; fallback to taxonomy terms #}
+        {% set rows = function('get_field', 'expertises', pid) ?: [] %}
+        {% set ids = [] %}
+        {% for row in rows %}
+          {% if row.expertise is defined and row.expertise %}
+            {% set ids = ids|merge([row.expertise]) %}
+          {% endif %}
+        {% endfor %}
+        {% set ids = ids|slice(0, 3) %}
+
+        {% set tag_items = [] %}
+        {% if ids and ids|length %}
+          {% for tid in ids %}
+            {% set term = function('get_term', tid, 'expertise') %}
+            {% if term and term.name %}
+              {# Use ACF term meta 'page' (field_expertise_page) as tag link; if empty, no link #}
+              {% set page_link = function('get_field', 'page', 'expertise_' ~ term.term_id) %}
+              {% set color = function('get_field', 'color', 'expertise_' ~ term.term_id) %}
+              {% set tag_items = tag_items|merge([{ label: term.name, link: page_link|default(null), color: color }]) %}
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          {% set terms = function('get_the_terms', pid, 'expertise') ?: [] %}
+          {% for t in terms|slice(0,3) %}
+            {% set page_link = function('get_field', 'page', 'expertise_' ~ t.term_id) %}
+            {% set color = function('get_field', 'color', 'expertise_' ~ t.term_id) %}
+            {% set tag_items = tag_items|merge([{ label: t.name, link: page_link|default(null), color: color }]) %}
+          {% endfor %}
+        {% endif %}
+
+        {% set items = items|merge([{
+          image: image,
+          title: p.post_title,
+          text: desc,
+          client: function('get_field', 'clients', pid),
+          link: function('get_permalink', pid),
+          tags: tag_items
+        }]) %}
+      {% endfor %}
+
+      <div class="mt-8">
+        {% include 'partials/components/cards/projet.twig' with { items: items, cards_bg_color: cards_bg_color } %}
+      </div>
+    {% else %}
+      <p class="text-wild-blue-yonder-600">Aucun projet à afficher.</p>
+    {% endif %}
+  </div>
+</section>

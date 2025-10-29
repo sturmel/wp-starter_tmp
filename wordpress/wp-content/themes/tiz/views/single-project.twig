@@ -1,0 +1,106 @@
+{% extends "base.twig" %}
+
+{% block content %}
+	{# Hero Project #}
+	{% set p = project %}
+	<section class="relative w-full bg-black-haze-50">
+		<div class="container mx-auto px-6 pt-32">
+			<div class="grid grid-cols-1 gap-8 lg:gap-10">
+				<div>
+					{# Client small label #}
+					{% if p.client %}
+						<div class="scroll-animate text-dodger-blue-700 font-medium mb-2">{{ p.client }}</div>
+					{% endif %}
+
+					{# Title (H1) with blue span support like hero #}
+					<h1 class="scroll-animate text-4xl md:text-6xl leading-tight font-semibold text-bay-of-many-900 [&>span]:text-dodger-blue-600 [&>span]:font-semibold">
+						{{ p.title }}
+					</h1>
+
+					{# Meta rows under title — always below title and full width #}
+					<div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+						{% if p.client %}
+							<div>
+								<div class="scroll-animate text-sm text-wild-blue-yonder-600">Client</div>
+								<div class="scroll-animate mt-1 text-bay-of-many-900 font-medium">{{ p.client }}</div>
+							</div>
+						{% endif %}
+
+						{% if p.tags and p.tags|length %}
+							<div class="md:col-span-2">
+								<div class="scroll-animate text-sm text-wild-blue-yonder-600">Expertises sollicitées</div>
+								<style>
+									.project-tag-chip {
+										color: var(--tag-color);
+										color: #273a7c;
+									}
+									.project-tag-chip:hover {
+										background-color: var(--tag-color);
+										color: #fff;
+										border-color: var(--tag-color);
+									}
+								</style>
+								<div class="scroll-animate mt-2 flex flex-wrap gap-3">
+									{% for t in p.tags %}
+										<a href="{{ t.link }}" class="project-tag-chip inline-flex items-center rounded-full border px-3 py-1 text-xs md:text-sm font-medium transition-colors duration-500" style="--tag-color: {{ t.color|default('#2563eb') }}; border-color: var(--tag-color);">{{ t.label }}</a>
+									{% endfor %}
+								</div>
+							</div>
+						{% endif %}
+
+						{% if p.link_url %}
+							<div>
+								<div class="scroll-animate text-sm text-wild-blue-yonder-600">En savoir plus</div>
+								<a href="{{ p.link_url }}" target="_blank" rel="noopener" class="scroll-animate mt-1 inline-flex items-center gap-2 text-azure-radiance-700 hover:text-azure-radiance-900 font-medium break-all">
+									{{ p.link_url }}
+									<span aria-hidden="true">↗</span>
+								</a>
+							</div>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		{% if p.image %}
+			{# Construire hero_src à partir de la taille 2048x2048 si disponible #}
+			{% set img_sizes = p.image.sizes %}
+			{% set hero_src = attribute(img_sizes,'2048x2048')|default(attribute(img_sizes,'full')|default(attribute(img_sizes,'large')|default(p.image.url))) %}
+			{# Générer un srcset responsive à partir des tailles disponibles #}
+			{% set srcset = '' %}
+			{% for key in ['medium','medium_large','large','1536x1536','2048x2048'] %}
+				{% set url = attribute(img_sizes, key) %}
+				{% set w = attribute(img_sizes, key ~ '-width') %}
+				{% if url and w %}
+					{% set srcset = srcset ~ (srcset ? ', ' : '') ~ url ~ ' ' ~ w ~ 'w' %}
+				{% endif %}
+			{% endfor %}
+			{# Taille par défaut si srcset vide #}
+			{% if not srcset %}{% set srcset = hero_src ~ ' ' ~ (p.image.width|default('1920')) ~ 'w' %}{% endif %}
+			<figure class="scroll-animate relative mt-8 w-full h-72 md:h-96 overflow-hidden rounded-none">
+				<img 
+					src="{{ hero_src }}" 
+					alt="{{ p.image.alt|default(p.title) }}" 
+					class="absolute inset-0 w-full h-full object-cover object-center" 
+					loading="eager" 
+					fetchpriority="high"
+					srcset="{{ srcset }}"
+					sizes="(min-width: 1280px) 1200px, 100vw"
+				/>
+				<div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent"></div>
+			</figure>
+		{% endif %}
+	</section>
+
+	{# Flexible content sections below the hero #}
+	<div class="relative z-10 w-full">
+		{% set sections = post.flexible_content %}
+		{% if sections %}
+			{% for section in sections %}
+				{% set layout = section.acf_fc_layout %}
+				{% include ["acf-layouts/" ~ layout ~ ".twig", "acf-layouts/__missing.twig"] with { section: section, post: post } %}
+			{% endfor %}
+		{% endif %}
+	</div>
+{% endblock %}

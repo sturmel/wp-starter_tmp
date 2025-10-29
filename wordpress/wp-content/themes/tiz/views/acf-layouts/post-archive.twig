@@ -1,0 +1,120 @@
+{# Layout: Articles – Archive (admin-filtered, no front filters) #}
+{% set heading = section.heading %}
+{% set description = section.description %}
+{% set ppp = section.posts_per_page|default(9) %}
+{% set orderby = 'date' %}
+{% set order = 'DESC' %}
+
+<section class="py-12 md:py-20 px-6 lg:px-2">
+  <div class="container mx-auto">
+    {% include 'partials/components/section-header.twig' with {
+      title: heading,
+      description: description,
+      context: 'default',
+      align: 'left',
+      container_classes: 'flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6'
+    } %}
+
+    {# Search query from URL (?q=) #}
+    {% set q = function('get_query_var', 'q')|default('') %}
+
+    {# Search bar only (no front filters) #}
+    <form method="get" class="mb-6 flex flex-wrap items-center gap-4">
+      <input type="search" name="q" value="{{ q }}" placeholder="Rechercher un article" class="scroll-animate w-full md:w-1/2 h-11 rounded-tiz border border-wild-blue-yonder-300 px-4 text-bay-of-many-900 bg-white outline-none focus:ring-2 focus:ring-dodger-blue-500" />
+      <button type="submit" class="scroll-animate animate-button inline-block px-6 py-3 rounded-full shadow transition duration-500 font-semibold uppercase text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dodger-blue-600 bg-dodger-blue-700 text-white hover:bg-dodger-blue-800" style="text-shadow: 0 1px 1px rgba(0,0,0,0.25);">Rechercher</button>
+    </form>
+
+    {# Read page-selected categories from ACF (array of term IDs) #}
+    {% set cat_ids = section.categories|default([]) %}
+
+    {# Pagination var from URL (?pg=) only #}
+    {% set pg = function('get_query_var', 'pg') %}
+    {% if pg is empty %}{% set pg = 1 %}{% endif %}
+    {% set pg = function('intval', pg) %}
+    {% if pg < 1 %}{% set pg = 1 %}{% endif %}
+
+    {# Build query via get_posts #}
+    {% set tax_query = [] %}
+    {% if cat_ids and cat_ids|length %}
+      {% set tax_query = [{ taxonomy: 'category', field: 'term_id', terms: cat_ids }] %}
+    {% endif %}
+
+    {% set posts = function('get_posts', {
+      post_type: 'post',
+      post_status: 'publish',
+      s: q,
+      orderby: orderby,
+      order: order,
+      posts_per_page: ppp,
+      paged: pg,
+      tax_query: tax_query,
+      suppress_filters: true
+    }) %}
+
+    {% set items = [] %}
+    {% for p in posts %}
+      {% set pid = p.ID %}
+      {% set title = function('get_the_title', pid) %}
+      {% set permalink = function('get_permalink', pid) %}
+      {# Featured image #}
+      {% set image = null %}
+      {% set thumb_id = function('get_post_thumbnail_id', pid) %}
+      {% if thumb_id %}
+        {% set src = function('wp_get_attachment_image_url', thumb_id, 'large') %}
+        {% if src %}
+          {% set image = { url: src, alt: title } %}
+        {% endif %}
+      {% endif %}
+
+      {# Categories as tags (limit 3) with optional color keys for styling consistency #}
+      {% set cats = function('get_the_category', pid) %}
+      {% set tag_items = [] %}
+      {% if cats %}
+        {% for c in cats[:3] %}
+          {% set label = c.name %}
+          {% set hex = function('get_field', 'color', 'category_' ~ c.term_id)|default(null) %}
+          {% set tag_items = tag_items|merge([{ label: label, link: function('get_category_link', c.term_id), color: hex }]) %}
+        {% endfor %}
+      {% endif %}
+
+      {% set excerpt = function('get_the_excerpt', pid) %}
+
+      {% set items = items|merge([{
+        image: image,
+        title: title,
+        text: excerpt,
+        link: permalink,
+        tags: tag_items
+      }]) %}
+    {% endfor %}
+
+    {% if items|length %}
+      <div class="mt-8">
+        {% include 'partials/components/cards/post.twig' with { items: items } %}
+      </div>
+    {% else %}
+      <p class="text-wild-blue-yonder-600">Aucun article à afficher.</p>
+    {% endif %}
+
+    {# Count for pagination only #}
+    {% set count_args = {
+      post_type: 'post', post_status: 'publish', s: q, orderby: orderby, order: order, tax_query: tax_query, posts_per_page: -1, fields: 'ids'
+    } %}
+    {% set all_ids = function('get_posts', count_args) %}
+    {% set total_posts = all_ids|length %}
+
+    {# Pagination component (preserve ?q=) #}
+    {% set base_url = function('get_permalink') %}
+    {% set total_pages = (total_posts / ppp)|round(0, 'ceil') %}
+    {% set params = {} %}
+    {% if q %}
+      {% set params = params|merge({ 'q': q }) %}
+    {% endif %}
+    {% include 'partials/components/pagination.twig' with {
+      base_url: base_url,
+      current: pg,
+      total_pages: total_pages,
+      params: params
+    } %}
+  </div>
+</section>

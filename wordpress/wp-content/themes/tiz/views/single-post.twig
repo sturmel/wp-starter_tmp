@@ -1,0 +1,60 @@
+{% extends "base.twig" %}
+
+{% block content %}
+  <article class="single-post" itemscope itemtype="https://schema.org/Article">
+    {# Header hero-like section with title + featured image on right #}
+    <section class="relative px-6 lg:px-2 pt-20 min-h-[50vh] flex items-stretch overflow-hidden">
+      <div class="container mx-auto flex flex-col md:flex-row gap-10 py-16 grow">
+        <div class="w-full md:w-1/2 flex flex-col gap-4 md:gap-6 justify-center text-left items-start">
+          {# Prefer custom title if provided #}
+          <h1 itemprop="headline" class="scroll-animate hero-h1 text-bay-of-many-900 [&>span]:font-semibold [&>span]:text-dodger-blue-600 leading-tight text-4xl md:text-5xl lg:text-7xl">
+            {{ post_header.custom_title ?: post.title }}
+          </h1>
+          {% if post_header.subtitle %}
+            <p class="text-bay-of-many-700 text-base md:text-lg">{{ post_header.subtitle }}</p>
+          {% endif %}
+          {% set published_ts = post.date('U') %}
+          {% if published_ts %}
+            <p class="text-wild-blue-yonder-600 text-sm">
+              Publié le {{ published_ts|date('d/m/Y') }}{% if post.author %} — par {{ post.author.name|default(post.author.display_name) }}{% endif %}
+            </p>
+          {% endif %}
+        </div>
+        <div class="w-full md:w-1/2 flex items-stretch">
+          {% if featured_image %}
+            <div class="scroll-animate relative w-full h-full">
+              <img src="{{ featured_image.src }}" alt="{{ featured_image.alt }}" class="w-full h-full object-cover rounded-tiz shadow-lg" />
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    {# Share buttons #}
+    <section class="px-6 lg:px-2">
+      <div class="container mx-auto max-w-4xl">
+        {% include 'partials/share-buttons.twig' with { post: post } %}
+      </div>
+    </section>
+
+    {# Post content #}
+    <section class="px-6 lg:px-2 pb-10">
+      <div class="container mx-auto max-w-4xl">
+        <div class="post-article-body prose prose-lg md:prose-xl leading-relaxed text-bay-of-many-900 max-w-none" itemprop="articleBody">
+          {{ post.content }}
+        </div>
+      </div>
+    </section>
+
+    {# Flexible content sections below the article #}
+    <div class="relative z-10 w-full">
+      {% set sections = flex_sections %}
+      {% if sections %}
+        {% for section in sections %}
+          {% set layout = section.acf_fc_layout %}
+          {% include ["acf-layouts/" ~ layout ~ ".twig", "acf-layouts/__missing.twig"] with { section: section, post: post } %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  </article>
+{% endblock %}

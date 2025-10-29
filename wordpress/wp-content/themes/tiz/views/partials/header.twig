@@ -1,0 +1,95 @@
+{# Site Header that matches the provided screenshot
+- Expects `main_menu` in context (Timber\Menu)
+- Uses the `nav-menu` component
+#}
+<header id="site-header" class="w-full fixed left-0 top-0 z-50 bg-transparent transition duration-500 ease-in-out will-change-transform">
+	<div id="header-topbar" class="hidden md:flex mx-auto w-full bg-white py-0.5 text-center text-sm md:text-base font-medium text-bay-of-many-900 will-change-transform transition-transform duration-500 ease-out">
+		<p class="m-auto mr-2">Les clients de l’agence Tiz sont
+			<span class="font-semibold">ravis de notre collaboration</span>
+		</p>
+		<svg viewbox="0 0 24 24" class="star-icon h-5 w-5 m-auto ml-0 mr-0.5 text-amber-400" aria-label="star"><polygon fill="currentColor" points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+		<svg viewbox="0 0 24 24" class="star-icon h-5 w-5 m-auto ml-0 mr-0.5 text-amber-400" aria-label="star"><polygon fill="currentColor" points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+		<svg viewbox="0 0 24 24" class="star-icon h-5 w-5 m-auto ml-0 mr-0.5 text-amber-400" aria-label="star"><polygon fill="currentColor" points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+		<svg viewbox="0 0 24 24" class="star-icon h-5 w-5 m-auto ml-0 mr-0.5 text-amber-400" aria-label="star"><polygon fill="currentColor" points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+		<svg viewbox="0 0 24 24" class="star-icon h-5 w-5 m-auto ml-0 text-amber-400" aria-label="star"><polygon fill="currentColor" points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+	</div>
+	<div id="header-menu" class="container relative mx-auto px-6 lg:px-2 will-change-transform transition-transform duration-500 ease-out">
+		<div
+			class="flex items-center justify-between gap-6 py-4">
+			{# Brand #}
+			<a href="/" class="shrink-0 inline-flex items-center" aria-label="Agence Tiz">
+				<img src="/wp-content/themes/tiz/assets/images/logo.webp" alt="Agence Tiz" class="h-8 md:h-12 w-auto" width="192" height="48"/>
+			</a>
+
+			{# Menu #}
+			<div class="flex-1 hidden xl:flex items-center justify-center">
+				{% include 'partials/components/nav-menu.twig' with { menu: main_menu, align: 'center' } %}
+			</div>
+
+			{# CTAs #}
+			<div class="flex items-center gap-3 sm:gap-4">
+				{% set cta_primary = { label: 'Parlons de votre projet', link: '/contactez-nous' } %}
+				{% set cta_phone = { label: 'Appelez-nous', link: 'tel:+33387101850' } %}
+				{% set cta_partner = { label: 'Devenir partenaire', link: '/partenaires' } %}
+				<div class="hidden xl:flex items-center gap-3">
+					{% include 'partials/components/button.twig' with { button: cta_primary, variant: 'primary' } %}
+					{% include 'partials/components/button.twig' with { button: cta_partner, variant: 'secondary' } %}
+				</div>
+				{# Mobile burger #}
+				<div class="flex xl:hidden">
+					<button type="button" class="hamburger cursor-pointer close relative w-10 h-9 m-auto" aria-label="Ouvrir le menu" data-mobile-menu-open aria-expanded="false">
+						<span class="pointer-events-none top-line bg-bay-of-many-900"></span>
+						<span class="pointer-events-none middle-line bg-bay-of-many-900"></span>
+						<span class="pointer-events-none hidden-line bg-bay-of-many-900"></span>
+						<span class="pointer-events-none bottom-line bg-bay-of-many-900"></span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+</header>
+
+{# Mobile menu extracted into a reusable component #}
+{% include 'partials/components/mobile-menu.twig' with { menu: main_menu, cta_primary: cta_primary, cta_partner: cta_partner } %}
+
+
+<style>
+
+	.hamburger span {
+		position: absolute;
+		left: 0.25rem;
+		width: 2rem;
+		height: 0.125rem;
+		background-color: #1f2937; /* bay-of-many-900 */
+		transition: all 0.3s ease-in-out;
+	}
+	.hamburger span.top-line {
+		top: 0.5rem;
+	}
+	.hamburger span.middle-line {
+		top: 1rem;
+	}
+	.hamburger span.hidden-line {
+		top: 1rem;
+	}
+	.hamburger span.bottom-line {
+		top: 1.5rem;
+	}
+
+	.hamburger.open span.top-line {
+		transform: translateX(1rem);
+		opacity: 0;
+	}
+	.hamburger.open span.middle-line {
+		transform: rotate(45deg);
+	}
+	.hamburger.open span.hidden-line {
+		transform: rotate(-45deg);
+	}
+	.hamburger.open span.bottom-line {
+		transform: translateX(-1rem);
+		opacity: 0;
+	}
+</style>

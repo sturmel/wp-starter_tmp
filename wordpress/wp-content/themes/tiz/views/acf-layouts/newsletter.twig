@@ -1,0 +1,45 @@
+{# Layout: Newsletter – Gradient CTA with CF7 #}
+{% set color_start = section.color_start|default('#0a84eb') %}
+{% set color_end = section.color_end|default('#0599ff') %}
+{% set heading = section.heading %}
+{% set subheading = section.subheading %}
+{% set form_id = section.contact_form|default(null) %}
+{# New optional full-width split background (top/bottom) #}
+{% set bg_split_top = section.background_split_top|default('') %}
+{% set bg_split_bottom = section.background_split_bottom|default('') %}
+{% set has_split_bg = bg_split_top and bg_split_bottom %}
+
+<section class="acf-newsletter py-12 px-6 lg:px-2 {{ has_split_bg ? 'relative overflow-hidden' : '' }}">
+  {% if has_split_bg %}
+    <div class="absolute inset-0 -z-10 pointer-events-none">
+      <div class="absolute top-0 left-0 w-full" style="height:50%;background: {{ bg_split_top }};"></div>
+      <div class="absolute bottom-0 left-0 w-full" style="height:50%;background: {{ bg_split_bottom }};"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto">
+    <div class="relative rounded-tiz shadow-[0_2rem_2rem_-1rem_rgba(35,58,124,0.25)] overflow-hidden">
+      <div class="p-8 md:p-12">
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 items-center">
+          <div class="text-white">
+            {% if heading %}
+              <h2 class="scroll-animate text-4xl md:text-5xl [&>span]:font-semibold">{{ heading|raw }}</h2>
+            {% endif %}
+            {% if subheading %}
+              <p class="scroll-animate text-white/85 mt-6 max-w-2xl">{{ subheading }}</p>
+            {% endif %}
+          </div>
+          <div>
+            <div class=" p-0 xl:p-8">
+              {% if form_id %}
+                {{ function('do_shortcode', '[contact-form-7 id="' ~ form_id ~ '"]') }}
+              {% else %}
+                <p class="text-white/80">Aucun formulaire sélectionné.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="absolute inset-0 -z-10" style="background: linear-gradient(90deg, {{ color_start }} 0%, {{ color_end }} 100%);"></div>
+    </div>
+  </div>
+</section>

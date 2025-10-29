@@ -1,0 +1,17 @@
+/* Imports must come first for browsers to load partials */
+@import "./theme.css";
+@import "tailwindcss";
+@import "./base.css";
+@import "./components/scroll-animate.css";
+@import "./components/project-archive.css";
+@import "./components/masonry-gallery.css";
+@import "./forms/contact-form.css";
+@import "./forms/newsletter.css";
+@import "./typography/post-article.css";
+@import "./typography/wysiwyg.css";
+@import "./utilities.css";
+
+/* Tailwind v4 content paths (used by the build, safe after imports) */
+@content '../../views/**/*.twig';
+@content '../../*.php';
+@content '../js/**/*.js';

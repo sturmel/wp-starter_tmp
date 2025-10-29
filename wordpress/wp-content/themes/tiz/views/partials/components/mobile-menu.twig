@@ -1,0 +1,76 @@
+{# Mobile slide-over menu (< xl). Max width ~380px).
+Inputs:
+- menu: Timber\Menu (expects menu.items)
+- cta_primary, cta_partner: button objects used in the promo card
+#}
+{% if menu and menu.items %}
+
+{# Mobile menu panel - 360-380px max width with child view + back button #}
+<aside data-mobile-menu-panel id="mobile-menu-panel" aria-hidden="true" class="fixed right-0 top-20 md:top-24 z-50 w-full md:w-[380px] max-w-full bg-black-haze-50 rounded-l-tiz overflow-hidden hidden">
+	<div class="mobile-menu-views relative w-full">
+		{# Root view #}
+		<section data-mobile-root class="absolute inset-0">
+			<nav>
+				<ul class="flex flex-col divide-y divide-bay-of-many-900/10">
+					{% for item in menu.items %}
+						{% set has_children = item.children and item.children|length %}
+						<li>
+							{% if has_children %}
+								<button type="button" data-open-submenu="submenu-{{ loop.index }}" class="w-full flex items-center justify-between px-6 py-4 text-bay-of-many-900 hover:text-white hover:bg-azure-radiance-800 transition-colors duration-500">
+									<span class="text-lg">{{ item.title }}</span>
+									<svg class="w-5 h-5 text-bay-of-many-900/70" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+										<path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01-.02-1.06L10.94 10 7.19 6.29a.75.75 0 111.06-1.06l4.24 4.24a.75.75 0 010 1.06l-4.24 4.24a.75.75 0 01-1.04 0z" clip-rule="evenodd"/>
+									</svg>
+								</button>
+							{% else %}
+								<a href="{{ item.link }}" class="flex items-center justify-between px-6 py-4 text-bay-of-many-900 hover:text-white hover:bg-azure-radiance-800 transition-colors duration-500">
+									<span class="text-lg">{{ item.title }}</span>
+								</a>
+							{% endif %}
+						</li>
+					{% endfor %}
+				</ul>
+			</nav>
+			<div class="relative rounded-tiz overflow-hidden m-3 mb-4 p-8 md:p-10 text-white lg:col-span-1 shadow-[1rem_0px_1rem_rgba(35,58,124,0.15))] flex flex-col justify-between">
+				<div>
+					<div class="text-3xl md:text-4xl">Discutons</div>
+					<div class="text-3xl md:text-4xl font-semibold">ensemble</div>
+				</div>
+				<div class="mt-6 flex items-center gap-4 flex-wrap">
+					{% include 'partials/components/button.twig' with { button: cta_primary, variant: 'primary', context: 'full_background' } %}
+					{% include 'partials/components/button.twig' with { button: cta_partner, variant: 'secondary', context: 'full_background' } %}
+				</div>
+				<div class="absolute roun inset-0 -z-10" style="background: linear-gradient(90deg, #0d6efd 0%, #0aa2ff 100%);"></div>
+			</div>
+
+		</section>
+
+		{# Per-item submenus #}
+		{% for item in menu.items %}
+			{% if item.children and item.children|length %}
+				<section class="absolute inset-0 hidden" data-submenu="submenu-{{ loop.index }}">
+					<div class="flex group items-center gap-2 px-4 py-3 border-b rounded-bl border-bay-of-many-900/10 hover:bg-azure-radiance-800 transition-colors duration-500">
+						<button type="button" data-back="submenu-{{ loop.index }}" class="inline-flex w-full h-full items-center gap-2 text-bay-of-many-900 group-hover:text-white transition-colors duration-500">
+							<svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+								<path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 010 1.06L9.06 10l3.73 3.71a.75.75 0 11-1.06 1.06l-4.24-4.24a.75.75 0 010-1.06l4.24-4.24a.75.75 0 011.06 0z" clip-rule="evenodd"/>
+							</svg>
+							<span class="text-lg">Retour</span>
+						</button>
+					</div>
+					<nav>
+						<ul class="flex flex-col divide-y divide-bay-of-many-900/10">
+							{% for child in item.children %}
+								<li>
+									<a href="{{ child.link }}" class="flex items-center justify-between px-6 py-4 text-bay-of-many-900 hover:text-white hover:bg-azure-radiance-800 transition-colors duration-500">
+										<span class="text-lg">{{ child.title }}</span>
+									</a>
+								</li>
+							{% endfor %}
+						</ul>
+					</nav>
+				</section>
+			{% endif %}
+		{% endfor %}
+	</div>
+</aside>
+{% endif %}

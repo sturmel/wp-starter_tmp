@@ -1,0 +1,111 @@
+<?php
+// Layout: Contact Form (left content + repeater infos, right CF7 form)
+if (!function_exists('acf_add_local_field_group')) {
+    return [];
+}
+
+return [
+    'key' => 'layout_contact_form',
+    'name' => 'contact-form',
+    'label' => 'Contact – Formulaire',
+    'display' => 'block',
+    'sub_fields' => [
+        [
+            'key' => 'field_contact_bg_color',
+            'label' => 'Couleur de fond',
+            'name' => 'background_color',
+            'type' => 'color_picker',
+            'default_value' => '',
+            'wrapper' => ['width' => '50'],
+        ],
+        [
+            'key' => 'field_contact_heading',
+            'label' => 'Titre',
+            'name' => 'heading',
+            'type' => 'text',
+            'required' => 1,
+            'instructions' => 'Vous pouvez ajouter une mise en forme &lt;span&gt;texte mis en forme&lt;/span&gt; dans le contenu final si nécessaire.',
+            'wrapper' => ['width' => '50'],
+        ],
+        [
+            'key' => 'field_contact_title_is_h1',
+            'label' => 'Rendre le titre en H1',
+            'name' => 'title_is_h1',
+            'type' => 'true_false',
+            'ui' => 1,
+            'default_value' => 0,
+            'wrapper' => ['width' => '50'],
+        ],
+        [
+            'key' => 'field_contact_description',
+            'label' => 'Sous-titre',
+            'name' => 'description',
+            'type' => 'textarea',
+            'rows' => 3,
+            'new_lines' => '',
+            'wrapper' => ['width' => '50'],
+        ],
+        [
+            'key' => 'field_contact_info_items',
+            'label' => 'Blocs d’information',
+            'name' => 'info_items',
+            'type' => 'repeater',
+            'layout' => 'row',
+            'button_label' => 'Ajouter un bloc',
+            'sub_fields' => [
+                [
+                    'key' => 'field_contact_info_icon',
+                    'label' => 'Picto',
+                    'name' => 'icon',
+                    'type' => 'image',
+                    'return_format' => 'array',
+                    'preview_size' => 'thumbnail',
+                ],
+                [
+                    'key' => 'field_contact_info_color',
+                    'label' => 'Couleur (accent)',
+                    'name' => 'accent_color',
+                    'type' => 'color_picker',
+                    'default_value' => '',
+                    'instructions' => 'Couleur utilisée pour le titre (et éventuellement le picto).',
+                ],
+                [
+                    'key' => 'field_contact_info_title',
+                    'label' => 'Titre',
+                    'name' => 'title',
+                    'type' => 'text',
+                    'required' => 1,
+                ],
+                [
+                    'key' => 'field_contact_info_text',
+                    'label' => 'Description',
+                    'name' => 'text',
+                    'type' => 'textarea',
+                    'rows' => 2,
+                ],
+                [
+                    'key' => 'field_contact_info_link',
+                    'label' => 'Lien interne',
+                    'name' => 'link',
+                    'type' => 'page_link',
+                    'post_type' => [],
+                    'allow_null' => 1,
+                    'allow_archives' => 0,
+                    'multiple' => 0,
+                    'instructions' => 'URL interne affichée en “cliquez-ici”.',
+                ],
+            ],
+        ],
+        [
+            'key' => 'field_contact_cf7',
+            'label' => 'Formulaire Contact Form 7',
+            'name' => 'contact_form',
+            'type' => 'post_object',
+            'post_type' => ['wpcf7_contact_form'],
+            'return_format' => 'id',
+            'ui' => 1,
+            'required' => 1,
+            'wrapper' => ['width' => '50'],
+        ],
+    ],
+];

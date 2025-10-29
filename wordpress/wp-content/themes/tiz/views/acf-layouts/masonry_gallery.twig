@@ -1,0 +1,60 @@
+{# Masonry Gallery section (4 -> 2 cols)
+Respects existing style system, reuses section header and global lightbox.
+#}
+{% set bg = section.background_color|default('') %}
+{% set images = section.images|default(section.photos|default([])) %}
+{% set heading = section.heading|default('') %}
+{% set description = section.description|default('') %}
+{% set primary_button = section.primary_button|default(null) %}
+{% set secondary_button = section.secondary_button|default(null) %}
+{% set is_class = bg starts with 'bg-' %}
+{% set bg_style = (bg and not is_class) ? 'background-color: ' ~ bg : '' %}
+{# Build an array of emoji URLs from the global gallery #}
+{% set emojis = section.emojis|default([]) %}
+{% set emoji_urls = [] %}
+{% for e in emojis %}
+  {% set emoji_urls = emoji_urls|merge([e.sizes.thumbnail|default(e.url)]) %}
+{% endfor %}
+
+{% if images|length > 0 %}
+<section class="py-12 md:py-20 {{ is_class ? bg : '' }}" {% if bg_style %}style="{{ bg_style }}"{% endif %} data-emojis='{{ emoji_urls|json_encode|e("html_attr") }}' data-emoji-count="6">
+  <div class="container mx-auto">
+    {% if heading or description or primary_button or secondary_button %}
+      {% include 'partials/components/section-header.twig' with {
+        title: heading,
+        description: description,
+        primary_button: primary_button,
+        secondary_button: secondary_button,
+        context: 'default',
+        align: 'left',
+        container_classes: 'flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 px-6 lg:px-2 mb-10'
+      } %}
+    {% endif %}
+  </div>
+
+  <div class="container mx-auto px-6 lg:px-2">
+    <ul class="masonry-grid">
+      {% for item in images %}
+        {% set alt = item.image.alt|default(item.caption|default('Photo')) %}
+        {% set src = item.image.sizes.large|default(item.image.url) %}
+        <li data-masonry-item>
+          <div class="masonry-content scroll-animate" style="--ov: {{ item.overlay_color|default('transparent') }}; --ovStop: 115%;">
+            <div>
+              {% include 'partials/components/acf-image.twig' with { image: item.image, class: 'masonry-img', size: 'large', alt: alt } %}
+              <!-- Hover/press overlay gradient using the overlay color -->
+              <div class="masonry-overlay" style="background: linear-gradient(to top, var(--ov) 0%, transparent var(--ovStop, 115%));"></div>
+              {% if item.caption %}
+                <div class="masonry-caption">
+                  <p>{{ item.caption }}</p>
+                </div>
+              {% endif %}
+              <!-- Emoji bubbles layer -->
+              <div class="emoji-layer"></div>
+            </div>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}

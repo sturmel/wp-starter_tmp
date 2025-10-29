@@ -1,0 +1,47 @@
+{# Values cards list - identical to expertise cards but without links
+Inputs:
+- items: [
+    {
+      image: ACF image array or { src, alt },
+      title: string (required),
+      text: string (required),
+      title_color: string (color from color picker),
+      custom_color: string hex (color picker value)
+    }
+  ]
+- grid_classes: string for the grid wrapper (default: responsive 2-4 cols)
+- card_classes: string to extend card styles
+#}
+{% if items and items|length %}
+	<div class="{{ grid_classes|default('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6') }}">
+		{% for item in items %}
+			{% set accent_color = item.custom_color|default('#0aa2ff') %}
+			{% set title_color = item.custom_color|default('#0f172a') %}
+			{% set card_bg = cards_bg_color|default('') %}
+			
+			<div class="group scroll-animate relative overflow-hidden rounded-tiz p-10 shadow-none transition duration-500 will-change-transform hover:-translate-y-2 hover:shadow-[0_2rem_6rem_rgba(35,58,124,0.2)] hover:bg-white {{ card_classes }} {{ card_bg ? '' : 'bg-black-haze-50' }}" {% if card_bg %}style="background-color: {{ card_bg }}"{% endif %}>
+				<div class="flex items-start gap-4">
+					{% if item.image %}
+						{% include 'partials/components/acf-image.twig' with {
+							image: item.image,
+							class: 'w-14 h-14 object-contain shrink-0',
+							size: 'thumbnail',
+							alt: item.image.alt|default(item.title|default(''))
+						} %}
+					{% endif %}
+				</div>
+				
+				<h3 class="relative w-fit text-lg md:text-xl font-semibold mt-5" style="color: {{ title_color }}">
+					{{ item.title }}					
+				</h3>
+				
+				{% if item.text %}
+					<p class="mt-5 text-sm md:text-base text-wild-blue-yonder-600 text-left">{{ item.text }}</p>
+				{% endif %}
+
+				{# Hover accent bar at bottom #}
+				<span class="pointer-events-none absolute bottom-0 left-0 h-1 w-full origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500" style="background-color: {{ accent_color }}"></span>
+			</div>
+		{% endfor %}
+	</div>
+{% endif %}

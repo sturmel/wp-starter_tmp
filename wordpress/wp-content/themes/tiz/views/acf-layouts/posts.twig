@@ -1,0 +1,94 @@
+{# Posts section — latest 3 (optionally filtered by category) or manual selection #}
+{% set heading = section.heading %}
+{% set description = section.description %}
+{% set primary_button = section.primary_button %}
+{% set secondary_button = section.secondary_button %}
+{% set bg = section.background_color|default('') %}
+{% set is_class = bg starts with 'bg-' %}
+{% set bg_style = (bg and not is_class) ? 'background-color: ' ~ bg : '' %}
+{% set display_latest = (section.display_latest is defined ? section.display_latest : false) %}
+{% set latest_cat = section.latest_category|default(null) %}
+{% set selected = section.selected_posts|default([]) %}
+
+<section class="py-12 md:py-20 px-6 lg:px-2 {{ is_class ? bg : '' }}" {% if bg_style %}style="{{ bg_style }}"{% endif %}>
+  <div class="container mx-auto">
+    {% include 'partials/components/section-header.twig' with {
+      title: heading,
+      description: description,
+      primary_button: primary_button,
+      secondary_button: secondary_button,
+      context: 'default',
+      align: 'left',
+      container_classes: 'flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6'
+    } %}
+
+    {% if display_latest %}
+      {% set query_args = {
+        post_type: 'post',
+        post_status: 'publish',
+        numberposts: 3,
+        orderby: 'date',
+        order: 'DESC'
+      } %}
+      {% if latest_cat %}
+        {% set query_args = query_args|merge({ category: latest_cat }) %}
+      {% endif %}
+      {% set posts = function('get_posts', query_args) %}
+    {% else %}
+      {% set posts = [] %}
+      {% for pid in selected %}
+        {% set p = function('get_post', pid) %}
+        {% set posts = posts|merge([p]) %}
+      {% endfor %}
+    {% endif %}
+
+    {% if posts and posts|length %}
+      {% set items = [] %}
+      {% for p in posts %}
+        {% set pid = p.ID %}
+        {% set title = function('get_the_title', pid) %}
+        {% set permalink = function('get_permalink', pid) %}
+        {# Featured image #}
+        {% set image = null %}
+        {% set thumb_id = function('get_post_thumbnail_id', pid) %}
+        {% if thumb_id %}
+          {% set src = function('wp_get_attachment_image_url', thumb_id, 'large') %}
+          {% if src %}
+            {% set image = { url: src, alt: title } %}
+          {% endif %}
+        {% endif %}
+
+        {# Categories as tags (limit 3) with color overrides like before #}
+        {% set cats = function('get_the_category', pid) %}
+        {% set tag_items = [] %}
+        {% if cats %}
+          {% for c in cats[:3] %}
+            {% set label = c.name %}
+            {% set colorKey =
+              label == 'Conseil' ? 'mantis' :
+              (label == 'Actualités' ? 'wild-blue-yonder' : null)
+            %}
+            {% set hex = function('get_field', 'color', 'category_' ~ c.term_id)|default(null) %}
+            {% set tag_items = tag_items|merge([{ label: label, link: function('get_category_link', c.term_id), colorKey: colorKey, color: hex }]) %}
+          {% endfor %}
+        {% endif %}
+
+        {% set excerpt = function('get_the_excerpt', pid) %}
+
+        {% set items = items|merge([{
+          image: image,
+          title: title,
+          text: excerpt,
+          link: permalink,
+          tags: tag_items
+        }]) %}
+      {% endfor %}
+
+      <div class="mt-8">
+        {% include 'partials/components/cards/post.twig' with { items: items } %}
+      </div>
+    {% else %}
+      <p class="text-wild-blue-yonder-600">Aucun article à afficher.</p>
+    {% endif %}
+  </div>
+</section>

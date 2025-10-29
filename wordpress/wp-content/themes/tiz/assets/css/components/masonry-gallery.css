@@ -1,0 +1,18 @@
+/* Masonry Gallery styles (extracted from template)
+   Kept local to avoid Tailwind interference inside the gallery */
+
+/* Make overlay appear also while pressing on mobile */
+.masonry-content:active .masonry-overlay { opacity: 1; }
+
+/* Local CSS to avoid Tailwind interference inside the gallery */
+.masonry-grid { position: relative; padding: 0; margin: 0; list-style: none; }
+.masonry-grid [data-masonry-item] { position: absolute; margin: 0; }
+.masonry-content { position: relative; border-radius: var(--radius-cust, 10px); overflow: hidden; transition: 500ms ease-in-out; }
+.masonry-content:hover { box-shadow: 0 2rem 6rem rgba(35,58,124,0.2);  transform: translateY(-12px); }
+.masonry-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.masonry-overlay { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 300ms ease; }
+.masonry-content:hover .masonry-overlay { opacity: 1; }
+.masonry-caption { position: absolute; left: 0; right: 0; bottom: 0; z-index: 20; padding: 16px; pointer-events: none; opacity: 0; transform: translateY(4px); transition: all 300ms ease; }
+.masonry-content:hover .masonry-caption { opacity: 1; transform: translateY(0); }
+.masonry-caption p { color: #fff; line-height: 1.4; font-size: 1rem; margin: 0; }
+.emoji-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }

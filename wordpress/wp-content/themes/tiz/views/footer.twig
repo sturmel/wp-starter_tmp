@@ -1,0 +1,134 @@
+{% set email = 'hello@tiz.fr' %}
+
+{% set address_line1 = '104 rue Hochfelden' %}
+{% set address_line2 = '67200 Strasbourg' %}
+{% set maps_url = 'https://maps.google.com/?q=' ~ ('Agence Tiz 104 rue Hochfelden 67200 Strasbourg')|url_encode %}
+{% set cta_primary = { label: 'Parlons de votre projet', link: '/contactez-nous' } %}
+{% set cta_secondary = { label: 'Appelez-nous', link: 'tel:+33367101850'} %}
+
+<footer id="footer" class="w-full z-10 relative bg-black-haze-50">
+	<div class="container mx-auto px-6 lg:px-2 py-12 mt-12 md:mt-20">
+		<div
+			class="scroll-animate grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
+			{# Col 1: Brand + tagline #}
+			<div class="flex flex-col items-start gap-4">
+				<img src="/wp-content/themes/tiz/assets/images/logo.webp" alt="Logo" class="h-10 sm:h-16 w-auto max-w-full object-contain">
+				<h3 class="scroll-animate text-3xl md:text-4xl text-bay-of-many-900 [&_span]:text-azure-radiance-600 [&_span]:font-semibold">
+					Le digital<br>
+					<span>au service de</span><br>
+					votre entreprise
+				</h3>
+			</div>
+
+			{# Col 2: Useful links from main menu #}
+			<div class="scroll-animate rounded-tiz p-6 lg:p-8 flex flex-col gap-4 border border-athens-gray-100">
+				<h4 class="text-sm font-semibold tracking-wide text-dodger-blue-600 uppercase">Liens utiles</h4>
+				<ul class="space-y-3 text-bay-of-many-900">
+					{% if main_menu and main_menu.items %}
+						<li>
+							<a href="/" class="hover:text-bay-of-many-700 transition-colors">Accueil</a>
+						</li>
+						{% for item in main_menu.items %}
+							<li>
+								<a href="{{ item.link }}" class="hover:text-bay-of-many-700 transition-colors">{{ item.title }}</a>
+							</li>
+						{% endfor %}
+					{% endif %}
+				</ul>
+			</div>
+
+			{# Col 3: Contact #}
+			<div class="scroll-animate rounded-tiz bg-azure-radiance-50 p-6 lg:p-8 flex flex-col justify-between bg-white">
+				<div class="space-y-3">
+					<h4 class="text-sm font-semibold tracking-wide text-dodger-blue-600 uppercase">Agence TIZ</h4>
+					<p class="text-bay-of-many-900">
+						<a href="mailto:{{ email }}" class="hover:text-bay-of-many-700">{{ email }}</a>
+					</p>
+					<p class="text-bay-of-many-900">
+						<a href="{{ 'tel:' ~ (phone|replace({' ': '', '.': '', '-': ''})) }}" class="hover:text-bay-of-many-700">{{ phone }}</a>
+					</p>
+					<p class="text-bay-of-many-900">{{ address_line1 }}</p>
+					<p class="text-bay-of-many-900">{{ address_line2 }}</p>
+				</div>
+				<div class="pt-4">
+					<a class="text-bay-of-many-900 font-semibold hover:underline" href="{{ maps_url }}" target="_blank" rel="noopener">Voir sur la carte</a>
+				</div>
+			</div>
+
+			{# Col 4: CTA #}
+			<div class="scroll-animate relative rounded-tiz overflow-hidden p-8 md:p-10 text-white lg:col-span-1 shadow-[0_2rem_3rem_-1rem_rgba(35,58,124,0.25)] flex flex-col justify-between">
+				<div>
+					<h3 class="text-3xl md:text-4xl">Discutons</h3>
+					<div class="text-3xl md:text-4xl font-semibold">ensemble</div>
+				</div>
+				<div class="mt-6 flex items-center gap-4 flex-wrap">
+					{% include 'partials/components/button.twig' with { button: cta_primary, variant: 'primary', context: 'full_background', white_button: true } %}
+					{% include 'partials/components/button.twig' with { button: cta_secondary, variant: 'secondary', context: 'full_background' } %}
+				</div>
+				<div class="absolute inset-0 -z-10" style="background: linear-gradient(90deg, #0d6efd 0%, #0aa2ff 100%);"></div>
+			</div>
+		</div>
+
+		{# Bottom bar with legal menu centered and social menu right #}
+		{% macro social_icon(url) %}
+			{% set u = url|lower %}
+			{% if 'facebook' in u %}
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.45 19.952" class="w-5 h-5" aria-hidden="true" focusable="false">
+					<path id="Tracé_32" data-name="Tracé 32" d="M718.054,1472.713h-2.015a1.685,1.685,0,0,0-1.685,1.685v2.5h3.656l-.467,3.637h-3.189v8.789h-3.638v-8.789H707.6V1476.9h3.112v-3.2a4.268,4.268,0,0,1,.922-2.69,4.825,4.825,0,0,1,.366-.4,4.375,4.375,0,0,1,3.077-1.229h2.973Z" transform="translate(-707.604 -1469.374)" fill="currentColor"/>
+				</svg>
+			{% elseif 'linkedin' in u %}
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14.937 14.902" class="w-5 h-5" aria-hidden="true" focusable="false">
+					<path id="Tracé_33" data-name="Tracé 33" d="M1681.389,1518.447h-3.1v-9.955h3.1Zm-1.549-11.314a1.794,1.794,0,1,1,1.794-1.8A1.8,1.8,0,0,1,1679.84,1507.133Zm13.14,11.314h-3.092v-4.84c0-1.155-.023-2.64-1.608-2.64-1.611,0-1.857,1.257-1.857,2.555v4.925h-3.093v-9.955h2.968v1.361h.042a3.251,3.251,0,0,1,2.929-1.608c3.133,0,3.711,2.061,3.711,4.742Z" transform="translate(-1678.044 -1503.545)" fill="currentColor"/>
+				</svg>
+			{% elseif 'youtube' in u %}
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18.593 13.277" class="w-5 h-5" aria-hidden="true" focusable="false">
+					<g id="Groupe_19" data-name="Groupe 19" transform="translate(0.5 0.5)">
+						<path id="Soustraction_1" data-name="Soustraction 1" d="M14.616,12.277H3.212C1.2,12.277,0,10.775,0,8.262V4.018C0,1.465,1.137,0,3.117,0H14.711c1.912,0,2.882,1.352,2.882,4.018V8.262C17.593,10.094,17.076,12.277,14.616,12.277ZM6.979,3.684h0V8.8l4.9-2.557-4.9-2.557Z" transform="translate(0 0)" fill="currentColor" stroke="none"/>
+					</g>
+				</svg>
+			{% elseif 'instagram' in u %}
+				<svg id="instagram_1_" data-name="instagram(1)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.887 15.891" class="w-5 h-5" aria-hidden="true" focusable="false">
+					<path id="Tracé_2694" data-name="Tracé 2694" d="M16.3,4.672a5.806,5.806,0,0,0-.369-1.928A4.071,4.071,0,0,0,13.6.419,5.821,5.821,0,0,0,11.673.05C10.823.009,10.553,0,8.4,0S5.968.009,5.12.047A5.808,5.808,0,0,0,3.193.416a3.877,3.877,0,0,0-1.409.919A3.912,3.912,0,0,0,.868,2.741,5.822,5.822,0,0,0,.5,4.669c-.04.851-.05,1.121-.05,3.278S.458,10.374.5,11.222a5.806,5.806,0,0,0,.369,1.928A4.07,4.07,0,0,0,3.19,15.474a5.822,5.822,0,0,0,1.928.369c.847.037,1.118.047,3.275.047s2.427-.009,3.275-.047a5.8,5.8,0,0,0,1.928-.369,4.064,4.064,0,0,0,2.325-2.325,5.826,5.826,0,0,0,.369-1.928c.037-.847.047-1.118.047-3.275s0-2.427-.04-3.275ZM14.864,11.16a4.355,4.355,0,0,1-.273,1.474,2.636,2.636,0,0,1-1.509,1.509,4.371,4.371,0,0,1-1.474.273c-.838.037-1.089.047-3.21.047s-2.375-.009-3.21-.047a4.353,4.353,0,0,1-1.474-.273A2.445,2.445,0,0,1,2.8,13.55a2.47,2.47,0,0,1-.593-.913,4.372,4.372,0,0,1-.273-1.474c-.037-.838-.047-1.09-.047-3.21s.009-2.375.047-3.21a4.353,4.353,0,0,1,.273-1.474,2.415,2.415,0,0,1,.6-.913,2.467,2.467,0,0,1,.913-.593A4.374,4.374,0,0,1,5.192,1.49c.838-.037,1.09-.047,3.21-.047s2.375.009,3.21.047a4.355,4.355,0,0,1,1.474.273A2.443,2.443,0,0,1,14,2.356a2.47,2.47,0,0,1,.593.913,4.373,4.373,0,0,1,.273,1.474c.037.838.047,1.089.047,3.21s-.009,2.369-.047,3.207Zm0,0" transform="translate(-0.449 0)" fill="currentColor"/>
+					<path id="Tracé_2695" data-name="Tracé 2695" d="M129.031,124.5a4.082,4.082,0,1,0,4.082,4.082A4.083,4.083,0,0,0,129.031,124.5Zm0,6.73a2.648,2.648,0,1,1,2.648-2.648A2.648,2.648,0,0,1,129.031,131.23Zm0,0" transform="translate(-121.084 -120.635)" fill="currentColor"/>
+					<path id="Tracé_2696" data-name="Tracé 2696" d="M364.356,89.555a.953.953,0,1,1-.953-.953A.953.953,0,0,1,364.356,89.555Zm0,0" transform="translate(-351.213 -85.851)" fill="currentColor"/>
+				</svg>
+			{% endif %}
+		{% endmacro %}
+
+		<div class="scroll-animate border-t border-black/5 mt-10 pt-6 text-sm text-bay-of-many-900">
+			<div class="grid grid-cols-1 sm:grid-cols-3 items-center gap-y-4 sm:gap-y-0 gap-x-4 sm:gap-x-6">
+				<div class="flex justify-center sm:justify-start order-2 sm:order-1 text-center sm:text-left">
+					<p>© {{ now|date('Y') }} Agence Tiz — Tous droits réservés</p>
+				</div>
+				<div class="flex justify-center order-1 sm:order-2">
+					{% if footer_menu_legal and footer_menu_legal.items %}
+						<ul class="flex items-center justify-center flex-wrap gap-x-4 gap-y-2">
+							{% for item in footer_menu_legal.items %}
+								<li class="flex items-center justify-center">
+									<a href="{{ item.link }}" class="px-2 text-center hover:text-bay-of-many-800 transition-colors duration-500">{{ item.title }}</a>
+								</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+				</div>
+				<div class="flex justify-center sm:justify-end order-3">
+					{% if footer_menu_social and footer_menu_social.items %}
+						<ul class="flex items-center justify-center sm:justify-end flex-wrap gap-x-3 gap-y-2">
+							{% for item in footer_menu_social.items %}
+								<li class="flex items-center justify-center">
+									{% if item.icon %}
+										{{ item.icon|raw }}
+									{% endif %}
+									<a href="{{ item.link }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center w-9 h-9  text-bay-of-many-900 hover:text-bay-of-many-700 transition-colors">
+										{{ _self.social_icon(item.link) }}
+										<span class="sr-only">{{ item.title }}</span>
+									</a>
+								</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>

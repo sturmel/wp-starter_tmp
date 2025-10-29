@@ -1,0 +1,19 @@
+<!doctype html>
+<!--[if lt IE 9]><html class="no-js no-svg ie lt-ie9 lt-ie8 lt-ie7" {{ site.language_attributes }}> <![endif]-->
+<!--[if IE 9]><html class="no-js no-svg ie ie9 lt-ie9 lt-ie8" {{ site.language_attributes }}> <![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js no-svg" {{ site.language_attributes }}> <!--<![endif]-->
+	{% include 'html-header.twig' %}
+	<body class="{{body_class}} relative bg-white-linen-50 text-swamp-950  overflow-x-hidden m-0 flex flex-col min-h-screen" data-template="base.twig">
+		{{ function('wp_body_open') }}
+		{% include 'partials/header.twig' %}
+		<main class="flex flex-col relative items-center overflow-hidden justify-center m-auto w-full">
+			{% block content %}
+			{% endblock %}
+		</main>	
+
+		{% include 'footer.twig' %}
+		
+		{{ function('wp_footer') }}	
+	</body>
+</html>
+

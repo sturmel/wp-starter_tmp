@@ -1,0 +1,70 @@
+{# Testimonial cards list
+Inputs:
+- items: [
+    {
+      rating: 1..5 (required),
+      testimonial: string (required),
+      full_name: string (required),
+      company: string (optional),
+      link: string (optional)
+    }
+  ]
+- grid_classes: string for the grid wrapper
+- card_classes: string to extend card styles
+ - card_style: string inline style (e.g., 'background-color: #fff') applied to all cards
+
+Notes:
+- Renders 1 to 5 stars using inline SVG. Stars beyond the rating are muted.
+#}
+{% macro star(isActive) %}
+  <svg viewBox="0 0 24 24" class="h-5 w-5 {{ isActive ? 'text-amber-400' : 'text-wild-blue-yonder-300' }}" aria-label="star" focusable="false">
+    <polygon fill="currentColor" points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </svg>
+{% endmacro %}
+
+{% import _self as m %}
+
+{% if items and items|length %}
+  <div class="{{ grid_classes|default('grid grid-cols-1 md:grid-cols-2 gap-6') }}">
+    {% for item in items %}
+      {% set rating = [1,2,3,4,5] %}
+      {% set raw_link = item.link|default(null) %}
+      {% set link_url = raw_link is same as '' ? null : raw_link %}
+    {% set is_clickable = link_url ? true : false %}
+  <div class="scroll-animate group relative h-full min-h-72 flex flex-col overflow-hidden rounded-tiz p-10 transition duration-500 {{ card_classes }} {{ card_style ? '' : 'bg-white' }} {{ is_clickable ? 'cursor-pointer will-change-transform hover:-translate-y-2 hover:shadow-[0_2rem_6rem_rgba(35,58,124,0.2)] hover:bg-white focus-within:-translate-y-2' : '' }}" {% if card_style %} style="{{ card_style }}"{% endif %}>
+        <div class="relative z-20 flex flex-col h-full">
+          <div class="flex items-center gap-1" aria-label="{{ item.rating }}/5">
+            {% for i in rating %}
+              {{ m.star(i <= (item.rating|default(0))) }}
+            {% endfor %}
+          </div>
+
+          {% if item.testimonial %}
+            <p class="mt-4 text-base leading-relaxed text-wild-blue-yonder-700">{{ item.testimonial }}</p>
+          {% endif %}
+
+          <div class="mt-6">
+            {% if item.full_name %}
+              <div class="font-semibold text-bay-of-many-900 uppercase tracking-wide">{{ item.full_name }}</div>
+            {% endif %}
+            {% if item.company %}
+              <div class="text-sm text-wild-blue-yonder-600">{{ item.company }}</div>
+            {% endif %}
+          </div>
+
+          {% if link_url %}
+            <p class="mt-auto pt-6 flex items-center font-bold uppercase text-azure-radiance-700 text-xs md:text-sm tracking-wider">
+              Découvrir
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-4 h-4 transition-transform ml-1 duration-300 group-hover:translate-x-1">
+                <path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </p>
+          {% endif %}
+        </div>
+        {% if link_url %}
+          <a href="{{ link_url }}" class="absolute inset-0 z-50" aria-label="Découvrir {{ item.full_name|default('le témoignage') }}"></a>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

@@ -1,0 +1,116 @@
+{# Expertise cards list
+Inputs:
+- i				{% if item.primary_button.label or item.secondary_button.label %}
+					<div class="mt-6 flex items-center gap-3 flex-wrap">
+						{% if item.primary_button.label and item.primary_button.link %}
+							{% include 'partials/components/button.twig' with { 
+								button: item.primary_button, 
+								variant: 'primary', 
+								context: 'full_background',
+								white_button: item.white_button|default(false)
+							} %}
+						{% endif %}
+						{% if item.secondary_button.label and item.secondary_button.link %}
+							{% include 'partials/components/button.twig' with { 
+								button: item.secondary_button, 
+								variant: 'secondary', 
+								context: 'full_background' 
+							} %}
+						{% endif %}
+					</div>
+				{% endif %}  type: 'cta' (optional, for CTA card),
+      image: ACF image array or { src, alt },
+      title: string (required),
+      text: string (optional),
+      link: string (internal URL, required for clickable card),
+      accent_bar_class: string Tailwind class for hover bar (e.g. 'bg-mantis-500') optional,
+      title_color_class: string Tailwind class for title color (e.g. 'text-mantis-600') optional,
+      accent_color: string hex (e.g. '#22c55e') optional — overrides classes for title and bar,
+      title_line1: string (for CTA type),
+      title_line2: string (for CTA type),
+      primary_button: object (for CTA type),
+      secondary_button: object (for CTA type)
+    }
+  ]
+- grid_classes: string for the grid wrapper (default: 1-2 cols)
+- card_classes: string to extend card styles
+#}
+{% if items and items|length %}
+	<div class="{{ grid_classes|default('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6') }}">
+		{% for item in items %}
+			{% if item.type == 'cta' %}
+				{# CTA Card #}
+				<div class="relative scroll-animate rounded-tiz overflow-hidden p-8 bg-black-haze-50 md:p-10 text-white shadow-[0_2rem_6rem_rgba(35,58,124,0.2)] flex flex-col justify-between min-h-[300px]">
+					<div>
+						{% if item.title_line1 %}
+							<h3 class="text-2xl md:text-4xl [&>span]:font-semibold ">{{ item.title_line1 }}</h3>
+						{% endif %}
+						{% if item.title_line2 %}
+							<div class="text-2xl md:text-xl mt-5">{{ item.title_line2 }}</div>
+						{% endif %}
+					</div>
+					{% if item.primary_button.label or item.secondary_button.label %}
+						<div class="mt-6 flex items-center gap-3 flex-wrap">
+							{% if item.primary_button.label and item.primary_button.link %}
+								{% include 'partials/components/button.twig' with { 
+									button: item.primary_button, 
+									variant: 'primary', 
+									context: 'full_background', 
+									white_button: true
+								} %}
+							{% endif %}
+							{% if item.secondary_button.label and item.secondary_button.link %}
+								{% include 'partials/components/button.twig' with { 
+									button: item.secondary_button, 
+									variant: 'secondary', 
+									context: 'full_background' 
+								} %}
+							{% endif %}
+						</div>
+					{% endif %}
+					<div class="absolute inset-0 -z-10" style="background: linear-gradient(90deg, #0d6efd 0%, #0aa2ff 100%);"></div>
+				</div>
+			{% else %}
+				{# Regular expertise card #}
+				{% set accent_bar = item.accent_bar_class|default('bg-azure-radiance-500') %}
+				{% set title_color = item.title_color_class|default('text-bay-of-many-900') %}
+				{% set use_inline = item.accent_color is defined and item.accent_color %}
+				{% set card_bg = cards_bg_color|default('') %}
+				<div
+					class="group scroll-animate relative overflow-hidden rounded-tiz p-10 shadow-none transition duration-500 will-change-transform hover:-translate-y-2 hover:shadow-[0_2rem_6rem_rgba(35,58,124,0.2)] hover:bg-white focus-within:-translate-y-2 {{ card_classes }} {{ card_bg ? '' : 'bg-black-haze-50' }}" {% if card_bg %}style="background-color: {{ card_bg }}"{% endif %}>
+					{# Full clickable surface #}
+					{% if item.link %}
+						<a href="{{ item.link }}" class="absolute inset-0 z-10" aria-label="{{ item.title }}"></a>
+					{% endif %}
+
+					<div class="flex items-start gap-4">
+						{% if item.image %}
+							{% include 'partials/components/acf-image.twig' with {
+								image: item.image,
+								class: 'w-14 h-14 object-contain shrink-0',
+								size: 'thumbnail',
+								alt: item.image.alt|default(item.title|default(''))
+							} %}
+						{% endif %}
+
+					</div>
+					<h3 class="relative w-fit text-xl md:text-2xl font-medium mt-5 {{ not use_inline ? title_color : '' }}" {% if use_inline %} style="color: {{ item.accent_color }}" {% endif %}>
+						{{ item.title }}
+						<span class="pointer-events-none absolute left-0 bottom-[1px] h-0.25 w-full origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 {{ not use_inline ? accent_bar : '' }}" {% if use_inline %} style="background-color: {{ item.accent_color }}" {% endif %}></span>
+					</h3>
+					{% if item.text %}
+						<p class="mt-5 text-sm md:text-base text-wild-blue-yonder-600">{{ item.text }}</p>
+					{% endif %}
+					<p class="flex font-bold uppercase text-bay-of-many-900 mt-5 text-sm ">
+						Découvrir
+						<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" fill="none" stroke="currentColor" class="w-4 h-4 transition-transform ml-1 m-auto duration-300 group-hover:translate-x-1" {% if use_inline %} style="color: {{ item.accent_color }}" {% endif %}>
+							<path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</p>
+					{# Hover accent bar at bottom #}
+					<span class="pointer-events-none absolute bottom-0 left-0 h-1 w-full origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 {{ not use_inline ? accent_bar : '' }}" {% if use_inline %} style="background-color: {{ item.accent_color }}" {% endif %}></span>
+				</div>
+			{% endif %}
+		{% endfor %}
+	</div>
+{% endif %}

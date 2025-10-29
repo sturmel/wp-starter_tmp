@@ -1,0 +1,72 @@
+{# Expertise section
+Renders header (h2, description, optional buttons) and a grid of expertise cards.
+#}
+{% set heading = section.heading %}
+{% set description = section.description %}
+{% set primary_button = section.primary_button %}
+{% set secondary_button = section.secondary_button %}
+{% set cards = section.cards|default([]) %}
+{% set cta_block = section.cta_block|default({}) %}
+{% set raw_cta_primary_button = cta_block.primary_button ?? null %}
+{% set cta_primary_button = null %}
+{% if raw_cta_primary_button and raw_cta_primary_button.label %}
+  {% set link_type = raw_cta_primary_button.link_type|default('internal') %}
+  {% if link_type == 'phone' %}
+    {% set raw_phone = raw_cta_primary_button.phone_number|default('') %}
+    {% set stripped_phone = raw_phone|replace({' ': '', '.': '', '-': '', '(': '', ')': ''}) %}
+    {% if stripped_phone %}
+      {% set cta_primary_button = raw_cta_primary_button|merge({ 'link': 'tel:' ~ stripped_phone }) %}
+    {% endif %}
+  {% else %}
+    {% if raw_cta_primary_button.link %}
+      {% set cta_primary_button = raw_cta_primary_button|merge({ 'link': raw_cta_primary_button.link }) %}
+    {% endif %}
+  {% endif %}
+{% endif %}
+{% set cards_bg_color = section.cards_bg_color|default('') %}
+{% set bg = section.background_color|default('') %}
+{% set is_class = bg starts with 'bg-' %}
+{% set bg_style = (bg and not is_class) ? 'background-color: ' ~ bg : '' %}
+
+<section class="py-12 md:py-20 px-6 lg:px-2 {{ is_class ? bg : '' }}" {% if bg_style %}style="{{ bg_style }}"{% endif %}>
+  <div class="container mx-auto">
+    {% include 'partials/components/section-header.twig' with {
+      title: heading,
+      description: description,
+      primary_button: primary_button,
+      secondary_button: secondary_button,
+      context: 'default',
+      align: 'left',
+      container_classes: 'flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6'
+    } %}
+
+    {% if cards|length or (cta_block.enable and (cta_block.title_line1 or cta_block.title_line2)) %}
+      {% set items = [] %}
+      {% for c in cards %}
+        {% set items = items|merge([{
+          image: c.image,
+          title: c.title,
+          text: c.text,
+          link: c.link,
+          accent_color: c.accent_color
+        }]) %}
+      {% endfor %}
+
+      {# Add CTA as last item if enabled #}
+      {% if cta_block.enable and (cta_block.title_line1 or cta_block.title_line2) %}
+        {% set items = items|merge([{
+          type: 'cta',
+          title_line1: cta_block.title_line1,
+          title_line2: cta_block.title_line2,
+          primary_button: cta_primary_button,
+          secondary_button: cta_block.secondary_button,
+          white_button: true
+        }]) %}
+      {% endif %}
+
+      <div class="mt-8">
+        {% include 'partials/components/cards/expertise.twig' with { items: items, cards_bg_color: cards_bg_color } %}
+      </div>
+    {% endif %}
+  </div>
+</section>

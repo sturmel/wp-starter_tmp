@@ -1,0 +1,12 @@
+{# WYSIWYG section with centered content #}
+{% set content = section.content %}
+
+{% if content %}
+  <section class="py-12 md:py-20 px-6 lg:px-2">
+    <div class="container mx-auto">
+      <div class="wysiwyg-content prose prose-lg md:prose-xl max-w-none text-bay-of-many-900 prose-headings:text-bay-of-many-900 prose-p:text-bay-of-many-900 prose-strong:text-bay-of-many-900 prose-a:text-azure-radiance-700 hover:prose-a:text-azure-radiance-800 prose-ul:list-disc prose-ol:list-decimal prose-ul:pl-6 prose-ol:pl-6 prose-li:marker:text-bay-of-many-900">
+        {{ content|raw }}
+      </div>
+    </div>
+  </section>
+{% endif %}

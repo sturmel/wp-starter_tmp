@@ -1,0 +1,41 @@
+{# Values section
+Renders header (h2, description) and a grid of value cards with icons and colored titles.
+#}
+{% set heading = section.heading %}
+{% set description = section.description %}
+{% set cards = section.cards|default([]) %}
+{% set cards_bg_color = section.cards_bg_color|default('') %}
+{% set bg = section.background_color|default('') %}
+{% set is_class = bg starts with 'bg-' %}
+{% set bg_style = (bg and not is_class) ? 'background-color: ' ~ bg : '' %}
+
+<section class="py-12 md:py-20 px-6 lg:px-2 {{ is_class ? bg : '' }}" {% if bg_style %}style="{{ bg_style }}"{% endif %}>
+  <div class="container mx-auto">
+    {# Section Header #}
+    {% if heading %}
+      <div class="mb-12">
+        <h2 class="scroll-animate text-4xl md:text-5xl text-bay-of-many-900 mb-6 [&>span]:text-dodger-blue-600 [&>span]:font-semibold">{{ heading|raw }}</h2>
+        {% if description %}
+          <p class="scroll-animate text-xl text-wild-blue-yonder-600 max-w-3xl mx-auto ml-0">{{ description }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if cards|length %}
+      {% set items = [] %}
+      {% for c in cards %}
+        {% set items = items|merge([{
+          image: c.image,
+          title: c.title,
+          text: c.text,
+          title_color: c.title_color,
+          custom_color: c.custom_color
+        }]) %}
+      {% endfor %}
+
+      <div class="mt-8">
+        {% include 'partials/components/cards/values.twig' with { items: items, cards_bg_color: cards_bg_color } %}
+      </div>
+    {% endif %}
+  </div>
+</section>

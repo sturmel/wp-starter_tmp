@@ -1,0 +1,57 @@
+{# Layout: Contact – Formulaire #}
+{% set heading = section.heading %}
+{% set description = section.description %}
+{% set info_items = section.info_items|default([]) %}
+{% set form_id = section.contact_form|default(null) %}
+{% set title_is_h1 = section.title_is_h1|default(false) %}
+{% set bg = section.background_color|default('') %}
+{% set is_class = bg starts with 'bg-' %}
+{% set bg_style = (bg and not is_class) ? 'background-color: ' ~ bg : '' %}
+
+<section class="acf-contact-form py-12 md:py-20 px-6 lg:px-2 {{ is_class ? bg : '' }} {% if title_is_h1 %} mt-16 md:mt-20{% endif %}" {% if bg_style %}style="{{ bg_style }}"{% endif %}>
+  <div class="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-start ">
+    <div>
+      {# Header left: H1 option #}
+      {% if heading %}
+        {% if title_is_h1 %}
+          <h1 class="scroll-animate text-4xl md:text-5xl text-bay-of-many-900 mb-6 [&>span]:text-dodger-blue-600 [&>span]:font-semibold">{{ heading|raw }}</h1>
+        {% else %}
+          <h2 class="scroll-animate text-4xl md:text-5xl text-bay-of-many-900 mb-6 [&>span]:text-dodger-blue-600 [&>span]:font-semibold">{{ heading|raw }}</h2>
+        {% endif %}
+        {% if description %}
+          <p class="scroll-animate text-xl text-wild-blue-yonder-600 max-w-3xl mx-auto ml-0">{{ description }}</p>
+        {% endif %}
+      {% endif %}
+
+      {# Info items (repeater) #}
+      {% if info_items|length %}
+        <div class="mt-8 space-y-6">
+          {% for it in info_items %}
+            <div class="flex items-start gap-4 scroll-animate">
+              {% if it.icon and it.icon.url %}
+                <img src="{{ it.icon.url }}" alt="" class="w-8 h-8 object-contain mt-1" loading="lazy" />
+              {% endif %}
+              <div>
+                {% if it.title %}
+                  <p class="text-xl font-semibold text-bay-of-many-900" {% if it.accent_color %}style="color: {{ it.accent_color }}"{% endif %}>{{ it.title }}</p>
+                {% endif %}
+                {% if it.text %}
+                  <p class="text-wild-blue-yonder-600">{{ it.text }}  {% if it.link %}<a href="{{ it.link }}" class="underline text-bay-of-many-900 hover:text-dodger-blue-700 transition">cliquez-ici</a>{% endif %}</p>
+                {% endif %}                              
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="bg-white/60 rounded-tiz p-6 md:p-8 shadow-inner">
+      {% if form_id %}
+        {# Render CF7 form by ID #}
+        {{ function('do_shortcode', '[contact-form-7 id="' ~ form_id ~ '"]') }}
+      {% else %}
+        <p class="text-wild-blue-yonder-600">Aucun formulaire sélectionné.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>

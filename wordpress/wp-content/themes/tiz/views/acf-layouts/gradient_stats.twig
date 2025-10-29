@@ -1,0 +1,71 @@
+{# Gradient Stats Section
+Props in section:
+- color_start: hex
+- color_end: hex
+- heading: string
+- stats: repeater [{ prefix?, value, label }]
+#}
+{% set color_start = section.color_start|default('#0d6efd') %}
+{% set color_end = section.color_end|default('#0aa2ff') %}
+{% set heading = section.heading %}
+{% set stats = section.stats|default([]) %}
+{% set use_four = stats|length >= 4 %}
+{% set grid_cols_md = use_four ? 'md:grid-cols-4' : 'md:grid-cols-3' %}
+{% set duration_ms = section.duration_ms|default(1600) %}
+{% set stagger_ms = section.stagger_ms|default(120) %}
+{# Optional full-width split background (top/bottom) #}
+{% set bg_split_top = section.background_split_top|default('') %}
+{% set bg_split_bottom = section.background_split_bottom|default('') %}
+{% set has_split_bg = bg_split_top and bg_split_bottom %}
+
+<section class="py-10 px-6 lg:px-2 {{ has_split_bg ? 'relative overflow-hidden' : '' }}">
+  {% if has_split_bg %}
+    <div class="absolute inset-0 -z-10 pointer-events-none">
+      <div class="absolute top-0 left-0 w-full" style="height:50%;background: {{ bg_split_top }};"></div>
+      <div class="absolute bottom-0 left-0 w-full" style="height:50%;background: {{ bg_split_bottom }};"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto">
+    <div class="relative rounded-tiz shadow-[0_2rem_2rem_-1rem_rgba(35,58,124,0.25)] overflow-hidden">
+      <div class="p-8 md:p-12">
+        <div class="flex flex-col items-center">
+          <div class="text-white">
+            {% if heading %}
+              <h2 class="scroll-animate text-4xl md:text-5xl [&>span]:font-semibold">{{ heading }}</h2>
+            {% endif %}
+          </div>
+          {% if stats|length %}
+            <div class="w-full {{ heading ? 'mt-12' : '' }}">
+              <div class="grid grid-cols-2 {{ grid_cols_md }} gap-6 md:gap-10 items-center text-center" data-counter-group data-stagger="{{ stagger_ms }}" data-duration-default="{{ duration_ms }}">
+                {% for s in stats %}
+                  {% set raw = (s.value ~ '') %}
+                  {% set numeric = raw|replace({',':'.',' ':'','+':''}) %}
+                  {% set has_dot = '.' in numeric %}
+                  {% set decimals = has_dot ? (numeric|split('.')[1]|default('')|length) : 0 %}
+                  <div class="scroll-animate">
+                    {% if s.icon %}
+                      {% include 'partials/components/acf-image.twig' with {
+                        image: s.icon,
+                        class: 'w-10 h-10 md:w-12 md:h-12 object-contain mx-auto mb-3',
+                        size: 'thumbnail',
+                        alt: s.icon.alt|default(s.label|default(''))
+                      } %}
+                    {% endif %}
+                    <div class="text-2xl md:text-4xl font-semibold tracking-tight text-white">
+                      {% if s.prefix %}<span class="align-center mr-1 text-2xl md:text-4xl">{{ s.prefix }}</span>{% endif %}
+                      <span data-counter data-target="{{ numeric|replace({',':'.'})|default('0') }}" data-final="{{ raw }}" data-decimals="{{ decimals }}"{% if s.delay %} data-delay="{{ s.delay }}"{% endif %}{% if s.duration %} data-duration="{{ s.duration }}"{% endif %}>0</span>
+                    </div>
+                    {% if s.label %}
+                      <div class="text-white mt-1 md:mt-2 text-sm md:text-xl">{{ s.label }}</div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="absolute inset-0 -z-10" style="background: linear-gradient(90deg, {{ color_start }} 0%, {{ color_end }} 100%);"></div>
+    </div>
+  </div>
+</section>

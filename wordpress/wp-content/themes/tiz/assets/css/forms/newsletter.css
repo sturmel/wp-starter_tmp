@@ -1,0 +1,111 @@
+@layer components {
+  /* Newsletter layout overrides */
+  .acf-newsletter .wpcf7-form { display: grid; gap: 1rem; }
+  .acf-newsletter .wpcf7-form > div { display: grid; gap: 1rem; }
+  .acf-newsletter .wpcf7-form > div p { display: grid; grid-template-columns: 1fr; gap: 1rem; margin: 0; }
+  .acf-newsletter .wpcf7-form > div p br { display: none; }
+  @media (min-width: 1024px) {
+    .acf-newsletter .wpcf7-form > div p { grid-template-columns: 1fr auto; align-items: center; }
+  }
+
+  /* Inputs on dark gradient */
+  .acf-newsletter .wpcf7-form-control[type="text"],
+  .acf-newsletter .wpcf7-form-control[type="email"],
+  .acf-newsletter .wpcf7-form-control[type="url"],
+  .acf-newsletter .wpcf7-form-control[type="tel"],
+  .acf-newsletter select,
+  .acf-newsletter textarea {
+    width: 100%;
+    height: 2.75rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.35);
+    background-color: transparent;
+    color: #fff;
+    padding: 0 1rem;
+    box-shadow: inset 0 1px 2px rgba(16,24,40,.06);
+    outline: none;
+    transition: box-shadow .2s, border-color .2s, background-color .2s;
+  }
+  .acf-newsletter ::placeholder { color: rgba(255,255,255,0.8); opacity: 1; }
+  .acf-newsletter textarea { min-height: 6rem; padding: 1rem; }
+  .acf-newsletter .wpcf7-form-control:focus,
+  .acf-newsletter select:focus,
+  .acf-newsletter textarea:focus {
+    border-color: rgba(255,255,255,0.9);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.25);
+  }
+
+  /* Submit button style (yellow pill) */
+  .acf-newsletter .wpcf7-submit {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    background-color: var(--color-saffron-300);
+    color: var(--color-bay-of-many-900);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-duration: 0.5s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+  .acf-newsletter .wpcf7-submit:hover { background-color: var(--color-saffron-400); }
+  .acf-newsletter .wpcf7-submit:focus-visible { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-dodger-blue-600), 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06); }
+
+  /* Checkbox in white theme */
+  .acf-newsletter .wpcf7-list-item input[type="checkbox"] { border: 1px solid rgba(255,255,255,0.5); background: transparent; }
+  .acf-newsletter .wpcf7-list-item input[type="checkbox"]:checked { background: #fff; border-color: #fff; }
+  .acf-newsletter .wpcf7-list-item .wpcf7-list-item-label { color: rgba(255,255,255,0.9); }
+
+  /* Select chevron on dark */
+  .acf-newsletter select:not([multiple]) {
+    -webkit-appearance: none; -moz-appearance: none; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M6 8l4 4 4-4' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 0.875rem 0.875rem;
+    padding-right: 2.5rem;
+  }
+  .acf-newsletter select::-ms-expand { display: none; }
+
+  /* Response message colors on dark */
+  .acf-newsletter .wpcf7-response-output { border-color: rgba(255,255,255,0.4); color: #111827; background: #fff; }
+  .acf-newsletter .wpcf7-form.sent .wpcf7-response-output { border-color: #22c55e; color: #166534; background: #f0fdf4; }
+  .acf-newsletter .wpcf7-form.invalid .wpcf7-response-output { border-color: #ef4444; color: #7f1d1d; background: #fef2f2; }
+
+  /* Newsletter: enforce same checkbox styling as Contact Form (higher specificity) */
+  .acf-newsletter .wpcf7-form .wpcf7-list-item input[type="checkbox"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 1rem;
+    height: 1rem;
+    margin-right: .5rem;
+    border-radius: .5rem;
+    border: 1px solid var(--color-wild-blue-yonder-300);
+    background: #fff;
+    position: relative;
+    top: .25rem;
+  }
+  .acf-newsletter .wpcf7-form .wpcf7-list-item input[type="checkbox"]:focus-visible { box-shadow: 0 0 0 3px rgba(5,153,255,0.15); }
+  .acf-newsletter .wpcf7-form .wpcf7-list-item input[type="checkbox"]:checked { background: var(--color-dodger-blue-800); border-color: var(--color-dodger-blue-800); box-shadow: 0 0 0 3px rgba(5,153,255,0.15); }
+  .acf-newsletter .wpcf7-form .wpcf7-list-item input[type="checkbox"]:checked::after { content: none; }
+
+  /* Newsletter: nicer response output (rounded, soft shadow) */
+  .acf-newsletter .wpcf7-response-output {
+    margin: 0;
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255,255,255,0.45);
+    background: #fff;
+    color: #111827;
+    box-shadow: 0 10px 20px rgba(2,8,23,0.15);
+  }
+  .acf-newsletter .wpcf7-form.sent .wpcf7-response-output { border-color: #22c55e; background: #f0fdf4; color: #166534; }
+  .acf-newsletter .wpcf7-form.invalid .wpcf7-response-output { border-color: #ef4444; background: #fef2f2; color: #7f1d1d; }
+}

@@ -1,0 +1,149 @@
+{# Hero Layout simplifié avec boutons réutilisables #}
+{% set variant = section.variant|default('full_background') %}
+{% set image = section.image %}
+{% set height_class = {
+	'screen': 'min-h-screen',
+	'large': 'min-h-[70vh]',
+	'medium': 'min-h-[50vh]'
+}[section.height|default('screen')] %}
+{% set align = section.alignment|default('left') %}
+{% set text_align = align == 'center' ? 'text-center items-center' : 'text-left items-start' %}
+{% set overlay_opacity = (section.overlay|default(0) / 100) %}
+
+{# Background color support: Tailwind bg- class or hex color #}
+{% set bg = section.background_color|default('') %}
+{% set is_class = bg starts with 'bg-' %}
+{% set bg_style = (bg and not is_class) ? 'background-color: ' ~ bg : '' %}
+
+{% set title_classes_full = 'leading-tight text-4xl md:text-6xl lg:text-7xl max-w-3xl' %}
+{% set title_classes_right = 'leading-tight text-4xl md:text-5xl lg:text-7xl' %}
+{% set title_classes_none = 'leading-tight text-4xl md:text-6xl lg:text-7xl max-w-4x' %}
+{% set heading_style = 'font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1.1;' %}
+
+{% set raw_primary_button = section.primary_button ?? null %}
+{% set primary_button = null %}
+{% if raw_primary_button and raw_primary_button.label %}
+	{% set link_type = raw_primary_button.link_type|default('internal') %}
+	{% set computed_link = link_type == 'external' ? raw_primary_button.external_url : raw_primary_button.link %}
+	{% if computed_link %}
+		{% set extra_attrs = link_type == 'external' ? { 'target': '_blank', 'rel': 'nofollow noopener noreferrer' } : {} %}
+		{% set primary_button = raw_primary_button|merge(extra_attrs)|merge({ 'link': computed_link }) %}
+	{% endif %}
+{% endif %}
+{% set secondary_button = section.secondary_button ?? null %}
+
+{% macro buttons(primary_button, secondary_button, variant, align) %}
+	<div class="scroll-animate flex flex-wrap gap-4 mt-4 {{ align == 'center' ? 'justify-center' : '' }}">
+		{% if primary_button %}
+			{% include 'partials/components/button.twig' with { button: primary_button, variant: 'primary', context: variant } %}
+		{% endif %}
+		{% include 'partials/components/button.twig' with { button: secondary_button, variant: 'secondary', context: variant } %}
+	</div>
+{% endmacro %}
+{% import _self as hero_layout %}
+
+{# Hide breadcrumbs on front page and blog posts index #}
+{% set show_breadcrumbs = not (function('is_front_page') or function('is_home')) %}
+
+
+{% if variant == 'full_background' %}
+{# Full background variant: allow separate desktop and mobile background images #}
+{% set image_mobile = section.image_mobile ?? null %}
+<section class="relative overflow-hidden px-6 lg:px-2 {{ height_class }} flex {{ (not image and is_class) ? bg : '' }}" {% if not image and bg_style %}style="{{ bg_style }}"{% endif %}>
+	{% if show_breadcrumbs %}
+		<div class="scroll-animate absolute hidden lg:block px-4 xl:px-0 container mx-auto left-0 top-24 right-0 text-[11px] md:text-xs lg:text-sm font-medium text-bay-of-many-900">
+			{{ function('do_shortcode', '[rank_math_breadcrumb]') }}
+		</div>
+	{% endif %}
+	{% if image %}
+		{# Build responsive srcsets from available sizes (prefer 2048x2048) #}
+		{% set desk_sizes = image.sizes %}
+		{% set desk_srcset = '' %}
+		{% for key in ['medium','medium_large','large','1536x1536','2048x2048'] %}
+			{% set url = attribute(desk_sizes, key) %}
+			{% set w = attribute(desk_sizes, key ~ '-width') %}
+			{% if url and w %}
+				{% set desk_srcset = desk_srcset ~ (desk_srcset ? ', ' : '') ~ url ~ ' ' ~ w ~ 'w' %}
+			{% endif %}
+		{% endfor %}
+		{% set desk_src = attribute(desk_sizes,'2048x2048')|default(attribute(desk_sizes,'full')|default(attribute(desk_sizes,'large')|default(image.url))) %}
+
+		{% set mob = image_mobile ?? null %}
+		{% set mob_srcset = '' %}
+		{% if mob and mob.sizes %}
+			{% for key in ['medium','medium_large','large','1536x1536','2048x2048'] %}
+				{% set url = attribute(mob.sizes, key) %}
+				{% set w = attribute(mob.sizes, key ~ '-width') %}
+				{% if url and w %}
+					{% set mob_srcset = mob_srcset ~ (mob_srcset ? ', ' : '') ~ url ~ ' ' ~ w ~ 'w' %}
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+
+		<picture class="absolute inset-0 -z-10">
+			{# Provide responsive candidates per breakpoint to avoid pixelation #}
+			{% if mob %}
+				<source media="(min-width: 1024px)" srcset="{{ desk_srcset ?: desk_src }}" sizes="100vw" />
+				<source media="(max-width: 1023px)" srcset="{{ mob_srcset ?: mob.url }}" sizes="100vw" />
+			{% else %}
+				<source srcset="{{ desk_srcset ?: desk_src }}" sizes="100vw" />
+			{% endif %}
+			{# Fallback <img> tag: set to full size to ensure sharpness; component builds its own srcset #}
+			{% include 'partials/components/acf-image.twig' with {
+				image: (mob ?? image),
+				class: 'w-full h-full object-cover object-right lg:object-center',
+				size: 'full',
+				alt: ((mob and mob.alt) ? mob.alt : (image.alt|default(''))),
+				loading: 'eager',
+				fetchpriority: 'high'
+			} %}
+		</picture>
+	{% endif %}
+	{% if section.overlay and overlay_opacity > 0 %}
+		<div class="absolute inset-0 bg-gradient-to-tr from-dodger-blue-700/80 to-azure-radiance-500/60" style="opacity: {{ overlay_opacity }}"></div>
+	{% endif %}
+	<div class="container mx-auto py-20 flex flex-col gap-8 justify-center {{ text_align }}">
+		{% if section.title %}<h1 class="scroll-animate hero-h1 text-bay-of-many-900 [&>span]:font-semibold [&>span]:text-dodger-blue-600 {{ title_classes_full }}" fetchpriority="high" style="{{ heading_style }}">{{ section.title|raw }}</h1>{% endif %}
+		{% if section.subtitle %}<h2 class="scroll-animate text-bay-of-many-900 font-normal text-lg md:text-xl max-w-2xl" fetchpriority="high">{{ section.subtitle }}</h2>{% endif %}
+		{% if section.description %}<p class="scroll-animate text-wild-blue-yonder-600 max-w-2xl text-base md:text-lg leading-relaxed">{{ section.description|raw }}</p>{% endif %}
+		{{ hero_layout.buttons(primary_button, secondary_button, variant, align) }}
+	</div>
+</section>
+{% elseif variant == 'image_right' %}
+<section class="relative px-6 lg:px-2 {{ height_class }} pt-24 flex items-stretch overflow-hidden {{ is_class ? bg : '' }}" {% if (not is_class) and bg_style %}style="{{ bg_style }}"{% endif %}>
+	{% if show_breadcrumbs %}
+		<div class="scroll-animate absolute hidden lg:block px-4 xl:px-0 container mx-auto left-0 top-28 right-0 text-[11px] md:text-xs lg:text-sm font-medium text-bay-of-many-900">
+			{{ function('do_shortcode', '[rank_math_breadcrumb]') }}
+		</div>
+	{% endif %}
+	<div class="container mx-auto flex flex-col md:flex-row gap-10 py-16 grow">
+		<div class="w-full md:w-1/2 flex flex-col gap-6 justify-center {{ text_align }}">
+			{% if section.title %}<h1 class="scroll-animate hero-h1 text-bay-of-many-900 [&>span]:font-semibold [&>span]:text-dodger-blue-600 {{ title_classes_right }}" style="{{ heading_style }}">{{ section.title|raw }}</h1>{% endif %}
+			{% if section.subtitle %}<h2 class="scroll-animate text-bay-of-many-900 font-normal text-lg md:text-xl max-w-xl">{{ section.subtitle }}</h2>{% endif %}
+			{% if section.description %}<p class="scroll-animate text-wild-blue-yonder-600 max-w-xl text-base md:text-lg leading-relaxed">{{ section.description|raw }}</p>{% endif %}
+			{{ hero_layout.buttons(primary_button, secondary_button, variant, align) }}
+		</div>
+		<div class="w-full md:w-1/2 flex items-stretch">
+			{% if image %}
+				<div class="scroll-animate relative w-full h-full">
+					{% include 'partials/components/acf-image.twig' with { image: image, class: 'w-full h-full object-cover rounded-tiz shadow-lg', size: 'large', alt: image.alt|default('') } %}
+				</div>
+			{% endif %}
+		</div>
+	</div>
+</section>
+{% else %} {# no_image #}
+<section class="relative px-6 lg:px-2 pt-24 {{ height_class }} flex {{ is_class ? bg : '' }}" {% if bg_style %}style="{{ bg_style }}"{% endif %}>
+	{% if show_breadcrumbs %}
+		<div class="scroll-animate absolute hidden lg:block px-4 xl:px-0 container mx-auto left-0 top-28 right-0 text-[11px] md:text-xs lg:text-sm font-medium text-bay-of-many-900">
+			{{ function('do_shortcode', '[rank_math_breadcrumb]') }}
+		</div>
+	{% endif %}
+	<div class="container mx-auto py-24 flex flex-col gap-8 justify-center {{ text_align }}">
+		{% if section.title %}<h1 class="scroll-animate hero-h1 text-bay-of-many-900 [&>span]:font-semibold [&>span]:text-dodger-blue-600 {{ title_classes_none }}" style="{{ heading_style }}">{{ section.title|raw }}</h1>{% endif %}
+		{% if section.subtitle %}<h2 class="scroll-animate text-bay-of-many-900 font-normal text-lg md:text-xl max-w-2xl">{{ section.subtitle }}</h2>{% endif %}
+		{% if section.description %}<p class="scroll-animate text-wild-blue-yonder-600 max-w-2xl text-base md:text-lg leading-relaxed">{{ section.description|raw }}</p>{% endif %}
+		{{ hero_layout.buttons(primary_button, secondary_button, variant, align) }}
+	</div>
+</section>
+{% endif %}

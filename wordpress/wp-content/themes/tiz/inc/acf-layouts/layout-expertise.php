@@ -1,0 +1,316 @@
+<?php
+// Layout: Expertise Section
+if (!function_exists('acf_add_local_field_group')) {
+    return [];
+}
+
+return [
+    'key' => 'layout_expertise',
+    'name' => 'expertise',
+    'label' => 'Expertises',
+    'display' => 'block',
+    'sub_fields' => [
+        [
+            'key' => 'field_expertise_bg_color',
+            'label' => 'Couleur de fond',
+            'name' => 'background_color',
+            'type' => 'color_picker',
+            'default_value' => '',
+            'wrapper' => ['width' => '50'],
+        ],
+        [
+            'key' => 'field_expertise_heading',
+            'label' => 'Titre (H2)',
+            'name' => 'heading',
+            'type' => 'text',
+            'instructions' => 'Texte simple uniquement.  Vous pouvez ajouter une mise en forme &lt;span&gt;texte mis en forme&lt;/span&gt; dans le contenu final si nécessaire.',
+            'required' => 1,
+            'wrapper' => ['width' => '50'],
+        ],
+        [
+            'key' => 'field_expertise_description',
+            'label' => 'Description',
+            'name' => 'description',
+            'type' => 'textarea',
+            'rows' => 3,
+            'new_lines' => '',
+            'wrapper' => ['width' => '50'],
+        ],
+        [
+            'key' => 'field_expertise_cards_bg_color',
+            'label' => 'Couleur de fond des cartes',
+            'name' => 'cards_bg_color',
+            'type' => 'color_picker',
+            'instructions' => 'Couleur appliquée au fond de toutes les cartes (par défaut gris clair).',
+            'wrapper' => ['width' => '50'],
+        ],
+        [
+            'key' => 'field_expertise_primary_btn',
+            'label' => 'Bouton principal',
+            'name' => 'primary_button',
+            'type' => 'group',
+            'layout' => 'block',
+            'wrapper' => ['width' => '50'],
+            'sub_fields' => [
+                [
+                    'key' => 'field_expertise_primary_btn_label',
+                    'label' => 'Libellé',
+                    'name' => 'label',
+                    'type' => 'text',
+                    'wrapper' => ['width' => '50'],
+                ],
+                [
+                    'key' => 'field_expertise_primary_btn_link',
+                    'label' => 'Page interne',
+                    'name' => 'link',
+                    'type' => 'page_link',
+                    'post_type' => [],
+                    'allow_null' => 1,
+                    'allow_archives' => 0,
+                    'multiple' => 0,
+                    'wrapper' => ['width' => '50'],
+                ],
+            ],
+        ],
+        [
+            'key' => 'field_expertise_secondary_btn',
+            'label' => 'Bouton secondaire',
+            'name' => 'secondary_button',
+            'type' => 'group',
+            'layout' => 'block',
+            'wrapper' => ['width' => '50'],
+            'sub_fields' => [
+                [
+                    'key' => 'field_expertise_secondary_btn_label',
+                    'label' => 'Libellé',
+                    'name' => 'label',
+                    'type' => 'text',
+                    'wrapper' => ['width' => '50'],
+                ],
+                [
+                    'key' => 'field_expertise_secondary_btn_link',
+                    'label' => 'Page interne',
+                    'name' => 'link',
+                    'type' => 'page_link',
+                    'post_type' => [],
+                    'allow_null' => 1,
+                    'allow_archives' => 0,
+                    'multiple' => 0,
+                    'wrapper' => ['width' => '50'],
+                ],
+            ],
+        ],
+        [
+            'key' => 'field_expertise_cards',
+            'label' => 'Cartes d\'expertise',
+            'name' => 'cards',
+            'type' => 'repeater',
+            'layout' => 'row',
+            'button_label' => 'Ajouter une expertise',
+            'min' => 1,
+            'sub_fields' => [
+                [
+                    'key' => 'field_expertise_card_image',
+                    'label' => 'Icône',
+                    'name' => 'image',
+                    'type' => 'image',
+                    'return_format' => 'array',
+                    'preview_size' => 'thumbnail',
+                ],
+                [
+                    'key' => 'field_expertise_card_title',
+                    'label' => 'Titre',
+                    'name' => 'title',
+                    'type' => 'text',
+                    'required' => 1,
+                ],
+                [
+                    'key' => 'field_expertise_card_text',
+                    'label' => 'Texte',
+                    'name' => 'text',
+                    'type' => 'textarea',
+                    'rows' => 3,
+                ],
+                [
+                    'key' => 'field_expertise_card_link',
+                    'label' => 'Lien interne',
+                    'name' => 'link',
+                    'type' => 'page_link',
+                    'post_type' => [],
+                    'allow_null' => 1,
+                    'allow_archives' => 0,
+                    'multiple' => 0,
+                ],
+                [
+                    'key' => 'field_expertise_card_color',
+                    'label' => 'Couleur d\'accent',
+                    'name' => 'accent_color',
+                    'type' => 'color_picker',
+                ],
+            ],
+        ],
+        [
+            'key' => 'field_expertise_cta',
+            'label' => 'Bloc CTA de fin',
+            'name' => 'cta_block',
+            'type' => 'group',
+            'layout' => 'block',
+            'wrapper' => ['width' => '100'],
+            'sub_fields' => [
+                [
+                    'key' => 'field_expertise_cta_enable',
+                    'label' => 'Afficher le bloc CTA',
+                    'name' => 'enable',
+                    'type' => 'true_false',
+                    'default_value' => 0,
+                    'wrapper' => ['width' => '50'],
+                ],
+                [
+                    'key' => 'field_expertise_cta_title_line1',
+                    'label' => 'Titre - Ligne 1',
+                    'name' => 'title_line1',
+                    'type' => 'text',
+                    'conditional_logic' => [
+                        [
+                            [
+                                'field' => 'field_expertise_cta_enable',
+                                'operator' => '==',
+                                'value' => '1',
+                            ],
+                        ],
+                    ],
+                    'wrapper' => ['width' => '50'],
+                ],
+                [
+                    'key' => 'field_expertise_cta_title_line2',
+                    'label' => 'Titre - Ligne 2',
+                    'name' => 'title_line2',
+                    'type' => 'text',
+                    'conditional_logic' => [
+                        [
+                            [
+                                'field' => 'field_expertise_cta_enable',
+                                'operator' => '==',
+                                'value' => '1',
+                            ],
+                        ],
+                    ],
+                    'wrapper' => ['width' => '50'],
+                ],
+                [
+                    'key' => 'field_expertise_cta_primary_btn',
+                    'label' => 'Bouton principal',
+                    'name' => 'primary_button',
+                    'type' => 'group',
+                    'layout' => 'block',
+                    'conditional_logic' => [
+                        [
+                            [
+                                'field' => 'field_expertise_cta_enable',
+                                'operator' => '==',
+                                'value' => '1',
+                            ],
+                        ],
+                    ],
+                    'wrapper' => ['width' => '50'],
+                    'sub_fields' => [
+                        [
+                            'key' => 'field_expertise_cta_primary_btn_link_type',
+                            'label' => 'Type de lien',
+                            'name' => 'link_type',
+                            'type' => 'button_group',
+                            'choices' => [
+                                'internal' => 'Page du site',
+                                'phone' => 'Numéro de téléphone',
+                            ],
+                            'default_value' => 'internal',
+                            'layout' => 'horizontal',
+                            'wrapper' => ['width' => '50'],
+                        ],
+                        [
+                            'key' => 'field_expertise_cta_primary_btn_label',
+                            'label' => 'Libellé',
+                            'name' => 'label',
+                            'type' => 'text',
+                            'wrapper' => ['width' => '50'],
+                        ],
+                        [
+                            'key' => 'field_expertise_cta_primary_btn_link',
+                            'label' => 'Page interne',
+                            'name' => 'link',
+                            'type' => 'page_link',
+                            'post_type' => [],
+                            'allow_null' => 1,
+                            'allow_archives' => 0,
+                            'multiple' => 0,
+                            'wrapper' => ['width' => '50'],
+                            'conditional_logic' => [
+                                [
+                                    [
+                                        'field' => 'field_expertise_cta_primary_btn_link_type',
+                                        'operator' => '==',
+                                        'value' => 'internal',
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'key' => 'field_expertise_cta_primary_btn_phone',
+                            'label' => 'Numéro de téléphone',
+                            'name' => 'phone_number',
+                            'type' => 'text',
+                            'instructions' => 'Format libre. Les caractères non numériques seront retirés du lien tel:.',
+                            'wrapper' => ['width' => '50'],
+                            'conditional_logic' => [
+                                [
+                                    [
+                                        'field' => 'field_expertise_cta_primary_btn_link_type',
+                                        'operator' => '==',
+                                        'value' => 'phone',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'key' => 'field_expertise_cta_secondary_btn',
+                    'label' => 'Bouton secondaire',
+                    'name' => 'secondary_button',
+                    'type' => 'group',
+                    'layout' => 'block',
+                    'conditional_logic' => [
+                        [
+                            [
+                                'field' => 'field_expertise_cta_enable',
+                                'operator' => '==',
+                                'value' => '1',
+                            ],
+                        ],
+                    ],
+                    'wrapper' => ['width' => '50'],
+                    'sub_fields' => [
+                        [
+                            'key' => 'field_expertise_cta_secondary_btn_label',
+                            'label' => 'Libellé',
+                            'name' => 'label',
+                            'type' => 'text',
+                            'wrapper' => ['width' => '50'],
+                        ],
+                        [
+                            'key' => 'field_expertise_cta_secondary_btn_link',
+                            'label' => 'Page interne',
+                            'name' => 'link',
+                            'type' => 'page_link',
+                            'post_type' => [],
+                            'allow_null' => 1,
+                            'allow_archives' => 0,
+                            'multiple' => 0,
+                            'wrapper' => ['width' => '50'],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ],
+];

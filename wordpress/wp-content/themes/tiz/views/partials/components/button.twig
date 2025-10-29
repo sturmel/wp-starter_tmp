@@ -1,0 +1,49 @@
+{# Reusable button component
+Inputs:
+- button: { label, link, target?, rel? }
+- variant: 'primary' | 'secondary'
+- context: layout context e.g. 'full_background', 'image_right', 'no_image', 'header'
+- white_button: (bool) force white background for primary button (default: false)
+- align_center (bool) optional
+- extra_classes (string) optional
+#}
+{% if button and button.label and button.link %}
+	{% set context = context|default('default') %}
+	{% set variant = variant|default('primary') %}
+	{% set white_button = white_button|default(false) %}
+	{% set target_attr = button.target|default('') %}
+	{% set rel_attr = button.rel|default('') %}
+	{% if target_attr == '_blank' and not rel_attr %}
+		{% set rel_attr = 'noopener noreferrer' %}
+	{% endif %}
+	{# Base classes (no default text color) #}
+	{% set base = 'animate-button inline-block px-6 py-3 rounded-full transition duration-500 font-semibold uppercase text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dodger-blue-600' %}
+
+	{# Palettes avec couleurs de texte explicites #}
+	{% if white_button and variant == 'primary' %}
+		{% set palette = 'bg-white text-azure-radiance-700 hover:bg-white/90' %}
+	{% elseif context == 'full_background' %}
+		{% if variant == 'primary' %}
+			{% set palette = 'bg-azure-radiance-700 text-white hover:bg-azure-radiance-800' %}
+		{% else %}
+			{% set palette = 'bg-saffron-300 text-bay-of-many-900 hover:bg-bay-of-many-900 hover:text-white' %}
+		{% endif %}
+	{% elseif context == 'header' %}
+		{% if variant == 'primary' %}
+			{% set palette = 'bg-azure-radiance-700 text-white hover:bg-azure-radiance-800' %}
+		{% else %}
+			{% set palette = 'bg-saffron-400 text-bay-of-many-900 hover:bg-saffron-500' %}
+		{% endif %}
+	{% else %}
+		{% if variant == 'primary' %}
+			{% set palette = 'bg-azure-radiance-700 text-white hover:bg-azure-radiance-800' %}
+		{% else %}
+			{% set palette = 'bg-saffron-300 text-bay-of-many-900 hover:bg-bay-of-many-900 hover:text-white' %}
+		{% endif %}
+	{% endif %}
+
+	{# Subtle text shadow to improve perceived contrast (won't affect Lighthouse calc). Apply only on light-on-dark primary. #}
+	{% set text_shadow = (context != 'full_background' and variant == 'primary') ? 'text-shadow: 0 1px 1px rgba(0,0,0,0.25);' : '' %}
+
+	<a href="{{ button.link }}" class="{{ base }} {{ palette }} {{ extra_classes|default('') }}" {% if text_shadow %}style="{{ text_shadow }}"{% endif %}{% if target_attr %} target="{{ target_attr }}"{% endif %}{% if rel_attr %} rel="{{ rel_attr }}"{% endif %}>{{ button.label }}</a>
+{% endif %}

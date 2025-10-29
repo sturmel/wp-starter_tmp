@@ -1,0 +1,57 @@
+{# Call To Action Section
+- color_start, color_end: gradient colors
+- heading: string (h2)
+- primary_button, secondary_button: { label, link, link_type?, phone_number? }
+#}
+{% set color_start = section.color_start|default('#0d6efd') %}
+{% set color_end = section.color_end|default('#0aa2ff') %}
+{% set heading = section.heading %}
+{% set raw_primary_button = section.primary_button ?? null %}
+{% set primary_button = null %}
+{% if raw_primary_button and raw_primary_button.label %}
+  {% set link_type = raw_primary_button.link_type|default('internal') %}
+  {% if link_type == 'phone' %}
+    {% set raw_phone = raw_primary_button.phone_number|default('') %}
+    {% set stripped_phone = raw_phone|replace({' ': '', '.': '', '-': '', '(': '', ')': ''}) %}
+    {% if stripped_phone %}
+      {% set phone_href = 'tel:' ~ stripped_phone %}
+      {% set primary_button = raw_primary_button|merge({ 'link': phone_href }) %}
+    {% endif %}
+  {% else %}
+    {% if raw_primary_button.link %}
+      {% set primary_button = raw_primary_button|merge({ 'link': raw_primary_button.link }) %}
+    {% endif %}
+  {% endif %}
+{% endif %}
+{% set secondary_button = section.secondary_button %}
+{# Optional full-width split background (top/bottom) #}
+{% set bg_split_top = section.background_split_top|default('') %}
+{% set bg_split_bottom = section.background_split_bottom|default('') %}
+{% set has_split_bg = bg_split_top and bg_split_bottom %}
+
+<section class="py-10 px-6 lg:px-2 {{ has_split_bg ? 'relative overflow-hidden' : '' }}">
+  {% if has_split_bg %}
+    <div class="absolute inset-0 -z-10 pointer-events-none">
+      <div class="absolute top-0 left-0 w-full" style="height:50%;background: {{ bg_split_top }};"></div>
+      <div class="absolute bottom-0 left-0 w-full" style="height:50%;background: {{ bg_split_bottom }};"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto">
+    <div class="relative rounded-tiz shadow-[0_2rem_2rem_-1rem_rgba(35,58,124,0.25)] overflow-hidden">
+      <div class="p-8 md:p-12">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div class="text-white text-center lg:text-left md:max-w-1/2">
+            {% if heading %}
+              <h2 class="scroll-animate text-4xl md:text-5xl [&>span]:font-semibold">{{ heading|raw }}</h2>
+            {% endif %}
+          </div>
+          <div class="scroll-animate flex items-center gap-4 flex-wrap justify-center">
+            {% include 'partials/components/button.twig' with { button: primary_button, variant: 'primary', context: 'full_background', white_button: true } %}
+            {% include 'partials/components/button.twig' with { button: secondary_button, variant: 'secondary', context: 'full_background' } %}
+          </div>
+        </div>
+      </div>
+      <div class="absolute inset-0 -z-10" style="background: linear-gradient(90deg, {{ color_start }} 0%, {{ color_end }} 100%);"></div>
+    </div>
+  </div>
+</section>

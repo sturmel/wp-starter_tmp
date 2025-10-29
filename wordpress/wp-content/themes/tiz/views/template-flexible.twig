@@ -1,0 +1,39 @@
+{% extends "base.twig" %}
+
+{% block content %}
+
+	{# Image de fond de page si définie #}
+	{% if post.background_image %}
+	<div class="fixed inset-0 z-0">
+		<img src="{{ post.background_image.sizes.large }}" alt="" class="w-full h-full object-cover">
+		{% if post.background_overlay %}
+		<div class="absolute inset-0 bg-black opacity-{{ (post.background_overlay * 10)|round }}"></div>
+		{% endif %}
+	</div>
+	{% endif %}
+	{# Contenu flexible #}
+	<div class="relative z-10 w-full">
+		{% set sections = post.flexible_content %}
+		{% if sections %}
+			{% for section in sections %}
+				{% set layout = section.acf_fc_layout %}
+				{# Inclusion manuelle des partials: acf-layouts/<layout>.twig si existant #}
+				{% include ["acf-layouts/" ~ layout ~ ".twig", "acf-layouts/__missing.twig"] with { section: section, post: post } %}
+			{% endfor %}
+		{% else %}
+			<div class="bg-red-600 text-white p-6 text-center">
+				<h2>Aucune section (flexible_content) définie</h2>
+				<p>Page ID : {{ post.ID }}</p>
+			</div>
+		{% endif %}
+	</div>
+
+	{# CTA Flottant #}
+	{% if post.enable_floating_cta and post.floating_cta_text and post.floating_cta_url %}
+		{% include 'partials/button/floating-cta.twig' with {
+			text: post.floating_cta_text,
+			url: post.floating_cta_url
+		} %}
+	{% endif %}
+
+{% endblock %}

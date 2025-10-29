@@ -1,0 +1,56 @@
+.wysiwyg-content {
+  color: var(--color-bay-of-many-900);
+}
+
+.wysiwyg-content h2,
+.wysiwyg-content h3,
+.wysiwyg-content h4 {
+  color: var(--color-bay-of-many-900);
+  font-family: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-top: 2em;
+  margin-bottom: 0.6em;
+}
+
+.wysiwyg-content h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.wysiwyg-content h3 {
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+}
+
+.wysiwyg-content h4 {
+  font-size: 1.125rem;
+}
+
+.wysiwyg-content p {
+  margin: 1rem 0;
+}
+
+.wysiwyg-content ul,
+.wysiwyg-content ol {
+  list-style-position: outside !important;
+  padding-left: 1.75rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.wysiwyg-content ul {
+  list-style: disc !important;
+  list-style-type: disc !important;
+}
+
+.wysiwyg-content ol {
+  list-style: decimal !important;
+  list-style-type: decimal !important;
+}
+
+.wysiwyg-content li {
+  margin: 0.4rem 0;
+}
+
+.wysiwyg-content li > ul,
+.wysiwyg-content li > ol {
+  margin-top: 0.4rem;
+}

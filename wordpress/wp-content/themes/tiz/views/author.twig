@@ -1,0 +1,55 @@
+{% extends "base.twig" %}
+
+{% block content %}
+	<div class="relative z-10 w-full">
+		{# Section Articles de l'auteur #}
+		<section class="relative w-full py-16 md:py-20 overflow-hidden">
+			<div class="absolute inset-0 z-0" style="background-color: #F9F8FE; opacity: 1.0;"></div>
+
+			<div class="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+				<div class="text-center mb-12">
+					<h1 class="text-3xl md:text-4xl font-semibold mb-4 scroll-animate">
+						Articles de
+						<span class="">{{ author.display_name }}</span>
+					</h1>
+					{% if author.description %}
+						<div class="text-lg ax-w-3xl mx-auto scroll-animate">
+							<p>{{ author.description }}</p>
+						</div>
+					{% else %}
+						<div class="text-lg max-w-3xl mx-auto scroll-animate">
+							<p>Découvrez tous les articles publiés par {{ author.display_name }}</p>
+						</div>
+					{% endif %}
+				</div>
+
+				{% if posts and posts|length > 0 %}
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+						{% for post in posts %}
+							{% include 'partials/article-card.twig' with {
+								article: post,
+								size: 'default',
+								excerpt_length: 150,
+								image_height: 'h-36'
+							} %}
+						{% endfor %}
+					</div>
+
+					{# Pagination #}
+					{% if pagination %}
+						<div class="flex justify-center scroll-animate">
+							{% include 'partials/pagination.twig' with { posts: pagination } %}
+						</div>
+					{% endif %}
+				{% else %}
+					<div class="text-center py-12">
+						<p class="text-lg">
+							Aucun article publié par cet auteur pour le moment.
+						</p>
+					</div>
+				{% endif %}
+
+			</div>
+		</section>
+	</div>
+{% endblock %}

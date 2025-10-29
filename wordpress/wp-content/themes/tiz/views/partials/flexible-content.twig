@@ -1,0 +1,8 @@
+{# Renders ACF flexible content sections using existing layout templates #}
+{% for section in sections %}
+  {% if section.acf_fc_layout %}
+    {% set layout = section.acf_fc_layout %}
+    {% set template = 'acf-layouts/' ~ layout ~ '.twig' %}
+    {% include template with { section: section } ignore missing %}
+  {% endif %}
+{% endfor %}

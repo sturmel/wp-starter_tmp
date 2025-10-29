@@ -1,0 +1,87 @@
+{# Reusable Pagination Component #}
+{# Expected context:
+ - base_url: Base URL to append query args to
+ - current: current page number (int)
+ - total_pages: total number of pages (int)
+ - params: dictionary of extra query args to keep (e.g., { q: '...', expertise: '...' })
+ - prev_text: optional, default 'Précédent'
+ - next_text: optional, default 'Suivant'
+#}
+
+{% set prev_text = prev_text|default('Précédent') %}
+{% set next_text = next_text|default('Suivant') %}
+{% set current = current|default(1) %}
+{% set total_pages = total_pages|default(1) %}
+{% set params = params|default({}) %}
+{% set base_url = base_url|default(function('get_permalink')) %}
+
+{% if total_pages > 1 %}
+  {# Build a compact set of page numbers with ellipses #}
+  {% set window = 1 %}
+  {% set start = current - window %}
+  {% if start < 1 %}{% set start = 1 %}{% endif %}
+  {% set end = current + window %}
+  {% if end > total_pages %}{% set end = total_pages %}{% endif %}
+
+  {% set pages = [1] %}
+  {% if start > 2 %}
+    {% set pages = pages|merge(['…']) %}
+  {% endif %}
+
+  {% for i in start..end %}
+    {% if i != 1 and i != total_pages %}
+      {% set pages = pages|merge([i]) %}
+    {% endif %}
+  {% endfor %}
+
+  {% if end < total_pages - 1 %}
+    {% set pages = pages|merge(['…']) %}
+  {% endif %}
+  {% if total_pages > 1 %}
+    {% set pages = pages|merge([total_pages]) %}
+  {% endif %}
+
+  <nav class="scroll-animate mt-8 flex justify-center" aria-label="Pagination">
+    <ul class="flex items-center gap-2">
+      {# Prev #}
+      {% if current > 1 %}
+        {% set prev_url = function('add_query_arg', params|merge({ 'pg': current - 1 }), base_url) %}
+        <li>
+          <a href="{{ prev_url }}" class="min-w-[2.5rem] h-10 px-3 inline-flex items-center justify-center rounded-full border border-wild-blue-yonder-300 bg-white text-bay-of-many-900 hover:bg-wild-blue-yonder-50 transition duration-500 text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dodger-blue-600">{{ prev_text }}</a>
+        </li>
+      {% else %}
+        <li>
+          <span class="min-w-[2.5rem] h-10 px-3 inline-flex items-center justify-center rounded-full border border-wild-blue-yonder-200 bg-white text-wild-blue-yonder-400 cursor-not-allowed text-sm font-semibold">{{ prev_text }}</span>
+        </li>
+      {% endif %}
+
+      {# Page numbers #}
+      {% for p in pages %}
+        {% if p == '…' %}
+          <li><span class="min-w-[2.5rem] h-10 px-3 inline-flex items-center justify-center text-wild-blue-yonder-400">…</span></li>
+        {% elseif p == current %}
+          <li>
+            <span aria-current="page" class="min-w-[2.5rem] h-10 px-3 inline-flex items-center justify-center rounded-full bg-dodger-blue-700 text-white border border-dodger-blue-700 hover:bg-dodger-blue-800 transition duration-500 text-sm font-semibold">{{ p }}</span>
+          </li>
+        {% else %}
+          {% set url = function('add_query_arg', params|merge({ 'pg': p }), base_url) %}
+          <li>
+            <a href="{{ url }}" class="min-w-[2.5rem] h-10 px-3 inline-flex items-center justify-center rounded-full border border-wild-blue-yonder-300 bg-white text-bay-of-many-900 hover:bg-wild-blue-yonder-50 transition duration-500 text-sm font-semibold">{{ p }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      {# Next #}
+      {% if current < total_pages %}
+        {% set next_url = function('add_query_arg', params|merge({ 'pg': current + 1 }), base_url) %}
+        <li>
+          <a href="{{ next_url }}" class="min-w-[2.5rem] h-10 px-3 inline-flex items-center justify-center rounded-full border border-wild-blue-yonder-300 bg-white text-bay-of-many-900 hover:bg-wild-blue-yonder-50 transition duration-500 text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dodger-blue-600">{{ next_text }}</a>
+        </li>
+      {% else %}
+        <li>
+          <span class="min-w-[2.5rem] h-10 px-3 inline-flex items-center justify-center rounded-full border border-wild-blue-yonder-200 bg-white text-wild-blue-yonder-400 cursor-not-allowed text-sm font-semibold">{{ next_text }}</span>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}

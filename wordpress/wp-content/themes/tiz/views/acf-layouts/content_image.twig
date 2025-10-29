@@ -1,0 +1,180 @@
+{# Content + Image section
+Renders content with optional image in different layouts (left, right, or no image)
+with expandable content and CTA buttons.
+#}
+{% set heading = section.heading %}
+{% set description = section.description %}
+{% set extended_content = section.extended_content %}
+{% set layout_type = section.layout_type|default('image_right') %}
+{% set image = section.image %}
+{% set primary_button = section.primary_button %}
+{% set secondary_button = section.secondary_button %}
+{% set read_more_text = section.read_more_text|default('En savoir plus') %}
+{% set read_less_text = section.read_less_text|default('Masquer') %}
+{% set bg = section.background_color|default('') %}
+{% set is_class = bg starts with 'bg-' %}
+{% set bg_style = (bg and not is_class) ? 'background-color: ' ~ bg : '' %}
+
+{# Generate unique ID for this section #}
+{% set section_id = 'content-' ~ random() %}
+
+<section class="py-12 md:py-20 px-6 lg:px-2 {{ is_class ? bg : '' }}" {% if bg_style %}style="{{ bg_style }}"{% endif %}>
+  <div class="container mx-auto">
+    {% if layout_type == 'no_image' %}
+      {# No image layout - left aligned content #}
+      <div class="mx-auto ml-0">
+        <div class="scroll-animate">
+          <h2 class="text-3xl md:text-4xl lg:text-5xl text-bay-of-many-900 mb-6 [&>span]:text-dodger-blue-600 [&>span]:font-semibold">{{ heading }}</h2>
+          <div class="max-w-4xl prose prose-lg prose-blue text-wild-blue-yonder-600 mb-6 [&_ul]:list-disc [&_ol]:list-decimal [&_li]:ml-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_p]:mb-4">
+            {{ description|raw }}
+          </div>
+          
+          {% if extended_content %}
+            <div id="{{ section_id }}-extended" class="max-w-4xl prose prose-lg prose-blue text-wild-blue-yonder-600 mb-6 hidden [&_ul]:list-disc [&_ol]:list-decimal [&_li]:ml-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_p]:mb-4">
+              {{ extended_content|raw }}
+            </div>
+          {% endif %}
+          
+          <div class="flex flex-col gap-4">
+            {% if extended_content %}
+              <button 
+                data-content-toggle="{{ section_id }}"
+                class="inline-flex items-center gap-2 text-bay-of-many-900 hover:text-bay-of-many-700 font-medium transition-colors"
+              >
+                <span id="{{ section_id }}-toggle-text" data-more-text="{{ read_more_text }}" data-less-text="{{ read_less_text }}">{{ read_more_text }}</span>
+                <svg id="{{ section_id }}-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+            {% endif %}
+            <div class="flex items-center gap-4 flex-wrap">
+              {% if primary_button.label and primary_button.link %}
+                {% include 'partials/components/button.twig' with { 
+                  button: primary_button, 
+                  variant: 'primary'
+                } %}
+              {% endif %}
+              {% if secondary_button.label and secondary_button.link %}
+                {% include 'partials/components/button.twig' with { 
+                  button: secondary_button, 
+                  variant: 'secondary'
+                } %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    {% else %}
+      {# With image layouts #}
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center" data-content-section="{{ section_id }}">
+        {% if layout_type == 'image_left' %}
+          {# Image left #}
+          {% if image %}
+            <div class="scroll-animate order-1 lg:order-1" data-image-col>
+              {% include 'partials/components/acf-image.twig' with {
+                image: image,
+                class: 'w-full h-auto rounded-tiz shadow-lg js-match-height-img m-auto',
+                size: 'large'
+              } %}
+            </div>
+          {% endif %}
+          
+          <div class="scroll-animate order-2 lg:order-2 flex flex-col justify-center h-full" data-text-col>
+            <h2 class="text-3xl md:text-4xl lg:text-5xl text-bay-of-many-900 mb-6 [&>span]:text-dodger-blue-600 [&>span]:font-semibold">{{ heading }}</h2>
+            <div class="prose prose-lg prose-blue max-w-4xl text-wild-blue-yonder-600 mb-6 [&_ul]:list-disc [&_ol]:list-decimal [&_li]:ml-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_p]:mb-4">
+              {{ description|raw }}
+            </div>
+            
+            {% if extended_content %}
+              <div id="{{ section_id }}-extended" class="prose prose-lg prose-blue max-w-4xl text-wild-blue-yonder-600 mb-6 hidden [&_ul]:list-disc [&_ol]:list-decimal [&_li]:ml-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_p]:mb-4">
+                {{ extended_content|raw }}
+              </div>
+            {% endif %}
+            
+            <div class="flex flex-col gap-4">
+              {% if extended_content %}
+                <button 
+                  data-content-toggle="{{ section_id }}"
+                  class="inline-flex items-center gap-2 text-bay-of-many-900 hover:text-bay-of-many-700 font-medium transition-colors"
+                >
+                  <span id="{{ section_id }}-toggle-text" data-more-text="{{ read_more_text }}" data-less-text="{{ read_less_text }}">{{ read_more_text }}</span>
+                  <svg id="{{ section_id }}-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+              {% endif %}
+              <div class="flex items-center gap-4 flex-wrap">
+                {% if primary_button.label and primary_button.link %}
+                  {% include 'partials/components/button.twig' with { 
+                    button: primary_button, 
+                    variant: 'primary'
+                  } %}
+                {% endif %}
+                {% if secondary_button.label and secondary_button.link %}
+                  {% include 'partials/components/button.twig' with { 
+                    button: secondary_button, 
+                    variant: 'secondary'
+                  } %}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          
+        {% else %}
+          {# Image right (default) #}
+          <div class="scroll-animate order-2 lg:order-1 flex flex-col justify-center h-full" data-text-col>
+            <h2 class="text-3xl md:text-4xl lg:text-5xl text-bay-of-many-900 mb-6 [&>span]:text-dodger-blue-600 [&>span]:font-semibold">{{ heading }}</h2>
+            <div class="prose prose-lg prose-blue max-w-4xl text-wild-blue-yonder-600 mb-6 [&_ul]:list-disc [&_ol]:list-decimal [&_li]:ml-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_p]:mb-4">
+              {{ description|raw }}
+            </div>
+            
+            {% if extended_content %}
+              <div id="{{ section_id }}-extended" class="prose prose-lg prose-blue max-w-4xl text-wild-blue-yonder-600 mb-6 hidden [&_ul]:list-disc [&_ol]:list-decimal [&_li]:ml-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_p]:mb-4">
+                {{ extended_content|raw }}
+              </div>
+            {% endif %}
+            
+            <div class="flex flex-col gap-4">
+              {% if extended_content %}
+                <button 
+                  data-content-toggle="{{ section_id }}"
+                  class="inline-flex items-center gap-2 text-bay-of-many-900 hover:text-bay-of-many-700 font-medium transition-colors"
+                >
+                  <span id="{{ section_id }}-toggle-text" data-more-text="{{ read_more_text }}" data-less-text="{{ read_less_text }}">{{ read_more_text }}</span>
+                  <svg id="{{ section_id }}-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+              {% endif %}
+              <div class="flex items-center gap-4 flex-wrap">
+                {% if primary_button.label and primary_button.link %}
+                  {% include 'partials/components/button.twig' with { 
+                    button: primary_button, 
+                    variant: 'primary'
+                  } %}
+                {% endif %}
+                {% if secondary_button.label and secondary_button.link %}
+                  {% include 'partials/components/button.twig' with { 
+                    button: secondary_button, 
+                    variant: 'secondary'
+                  } %}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          
+          {% if image %}
+            <div class="scroll-animate order-1 lg:order-2" data-image-col>
+              {% include 'partials/components/acf-image.twig' with {
+                image: image,
+                class: 'w-full h-auto rounded-tiz shadow-lg js-match-height-img m-auto',
+                size: 'large'
+              } %}
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</section>

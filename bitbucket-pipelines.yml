@@ -1,0 +1,31 @@
+pipelines:
+  default:
+    - step:
+        name: Install PHP dependencies
+        image: composer:2
+        caches:
+          - composer
+        script:
+          - cd wordpress/wp-content/themes/timber-starter-theme
+          - composer install --prefer-dist --no-dev --optimize-autoloader
+        artifacts:
+          - wordpress/wp-content/themes/timber-starter-theme/vendor/**
+    - step:
+        name: Build Tiz assets
+        image: node:22
+        caches:
+          - node
+        script:
+          - cd wordpress/wp-content/themes/tiz
+          - npm ci || npm install
+          - npm run build
+        artifacts:
+          - wordpress/wp-content/themes/tiz/assets/**
+
+options:
+  size: 2x
+
+definitions:
+  caches:
+    composer: ~/.composer/cache
+    node: ~/.npm
