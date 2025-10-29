@@ -45,12 +45,12 @@ Ce repository contient un stack WordPress complet basé sur Docker avec des serv
    # Thème Timber (dépendances PHP)
    cd wordpress/wp-content/themes/timber-starter-theme
    composer install
-   cd ../../../../
+   ```
 
+   ```bash
    # Thème Tiz (dépendances Node.js)
    cd wordpress/wp-content/themes/tiz
    npm install
-   cd ../../../../
    ```
 
 2. **Démarrer le stack Docker :**
@@ -283,38 +283,6 @@ Le thème Tiz inclut un système personnalisé de webhooks pour Contact Form 7 q
 3. **Webhook** : Les données sont automatiquement POSTées en JSON vers n8n
 4. **Réponse** : Le statut de réussite/échec est affiché à l'utilisateur
 
-**Format des données envoyées :**
-```json
-{
-  "form": {
-    "id": 123,
-    "title": "Contact Form"
-  },
-  "meta": {
-    "timestamp": "2025-10-30T10:00:00Z",
-    "remote_ip": "192.168.1.1",
-    "user_agent": "Mozilla/5.0...",
-    "url": "https://example.com/contact",
-    "referer": "https://example.com"
-  },
-  "fields": {
-    "your-name": "John Doe",
-    "your-email": "john@example.com",
-    "your-message": "Hello world"
-  },
-  "files": [
-    {
-      "field-name": [
-        {
-          "filename": "document.pdf",
-          "path": "/tmp/upload/document.pdf"
-        }
-      ]
-    }
-  ]
-}
-```
-
 ### Configuration n8n
 
 1. **Webhook n8n** : Créer un workflow n8n avec un trigger "Webhook"
@@ -433,13 +401,3 @@ docker compose build --no-cache
 - Surveiller les logs Docker Compose
 - Monitorer l'usage des ressources des conteneurs
 - Vérifier la santé des webhooks n8n régulièrement
-
----
-
-## 🤝 Contribution
-
-Ce projet est conçu pour être extensible. N'hésitez pas à :
-- Ajouter de nouveaux workflows n8n
-- Étendre les fonctionnalités des thèmes
-- Améliorer l'intégration Qdrant
-- Optimiser le pipeline CI/CD
