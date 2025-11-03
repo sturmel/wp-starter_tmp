@@ -130,6 +130,12 @@ This repository contains a complete Docker-based WordPress stack with integrated
 - **Optimization**: Minified assets and production-only dependencies
 - **Validation**: Automatic tests before deployment
 
+### Branch Workflow
+
+- **Active branches**: `main` (production source of truth), `stage` (pre-production), feature branches created from `stage`.
+- **Feature cycle**: step 1 branch from `stage` (`feature/...`); step 2 develop and test locally with the Docker stack; step 3 merge back into `stage` via Pull Request or local merge; step 4 push to `stage` to trigger the staging pipeline that rebuilds assets and deploys to pre-production; step 5 run acceptance tests in pre-production.
+- **Production release**: step 1 merge `stage` into `main` after validation; step 2 push to `main` to trigger the production pipeline, reusing the artifacts built on `stage` for deployment to production.
+
 ### Stopping the Stack
 
 ```bash

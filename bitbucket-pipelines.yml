@@ -1,7 +1,10 @@
-pipelines:
-  default:
-    - step:
-        name: Install PHP dependencies
+definitions:
+  caches:
+    composer: ~/.composer/cache
+    node: ~/.npm
+  steps:
+    - step: &build-php 
+        name: Build PHP (Timber)
         image: composer:2
         caches:
           - composer
@@ -10,22 +13,51 @@ pipelines:
           - composer install --prefer-dist --no-dev --optimize-autoloader
         artifacts:
           - wordpress/wp-content/themes/timber-starter-theme/vendor/**
-    - step:
-        name: Build Tiz assets
+          
+    - step: &build-js-css
+        name: Build JS/CSS
         image: node:22
         caches:
           - node
         script:
-          - cd wordpress/wp-content/themes/tiz
+          - 'THEME_NAME=${THEME_NAME:-tiz}'
+          - 'THEME_PATH="wordpress/wp-content/themes/${THEME_NAME}"'
+          - 'echo "Using theme: ${THEME_NAME}"'
+          - 'cd "${THEME_PATH}"'
           - npm ci || npm install
           - npm run build
         artifacts:
-          - wordpress/wp-content/themes/tiz/assets/**
+          - wordpress/wp-content/themes/*/assets/**
 
+pipelines:
+  branches:
+    
+    stage:
+      - step: *build-php     
+      - step: *build-js-css
+      - step:
+          name: ✅ Deploy to Pre-production
+          script:
+            - echo "Déploiement en PREPROD..."
+            - rsync -avz --delete \
+              --exclude '.env' \
+              --exclude 'node_modules/' \
+              --exclude '.git/' \
+              ./wordpress/ $SSH_USER_PREPROD@$SSH_HOST_PREPROD:$DEPLOY_PATH_PREPROD
+
+    main:
+      - step: *build-php  
+      - step: *build-js-css  
+      - step:
+          name: 🛑 Deploy to PRODUCTION
+          trigger: manual 
+          script:
+            - echo "Déploiement en PRODUCTION..."
+            - rsync -avz --delete \
+              --exclude '.env' \
+              --exclude 'node_modules/' \
+              --exclude '.git/' \
+              ./wordpress/ $SSH_USER_PROD@$SSH_HOST_PROD:$DEPLOY_PATH_PROD
+           
 options:
   size: 2x
-
-definitions:
-  caches:
-    composer: ~/.composer/cache
-    node: ~/.npm
