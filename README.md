@@ -136,6 +136,12 @@ This repository contains a complete Docker-based WordPress stack with integrated
 - **Feature cycle**: step 1 branch from `stage` (`feature/...`); step 2 develop and test locally with the Docker stack; step 3 merge back into `stage` via Pull Request or local merge; step 4 push to `stage` to trigger the staging pipeline that rebuilds assets and deploys to pre-production; step 5 run acceptance tests in pre-production.
 - **Production release**: step 1 merge `stage` into `main` after validation; step 2 push to `main` to trigger the production pipeline, reusing the artifacts built on `stage` for deployment to production.
 
+### Pipeline Variables
+
+- Define `THEME_NAME` to select the WordPress theme directory built during the pipeline (`tiz` by default).
+- Provide SSH credentials for each target: `SSH_USER_PREPROD`, `SSH_HOST_PREPROD`, `DEPLOY_PATH_PREPROD`, `SSH_USER_PROD`, `SSH_HOST_PROD`, `DEPLOY_PATH_PROD`.
+- Configure compatible Bitbucket secured variables or deployment variables for any SSH keys or passphrases needed by `rsync`.
+
 ### Stopping the Stack
 
 ```bash
