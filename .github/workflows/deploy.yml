@@ -84,6 +84,11 @@ jobs:
           name: theme-assets
           path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/assets/
 
+      - name: Copy assets to dist
+        run: |
+          mkdir -p wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist
+          cp -r wordpress/wp-content/themes/${{ env.THEME_NAME }}/assets/* wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist/
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -125,6 +130,11 @@ jobs:
         with:
           name: theme-assets
           path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/assets/
+
+      - name: Copy assets to dist
+        run: |
+          mkdir -p wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist
+          cp -r wordpress/wp-content/themes/${{ env.THEME_NAME }}/assets/* wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist/
 
       - name: Setup SSH
         run: |

@@ -45,6 +45,7 @@ pipelines:
               --exclude 'node_modules/' \
               --exclude '.git/' \
               --exclude 'wp-content/uploads/' \
+              --exclude 'wp-content/themes/*/dist/' \
               ./wordpress/ $SSH_USER_PREPROD@$SSH_HOST_PREPROD:$DEPLOY_PATH_PREPROD
 
     main:
@@ -61,6 +62,7 @@ pipelines:
               --exclude 'node_modules/' \
               --exclude '.git/' \
               --exclude 'wp-content/uploads/' \
+              --exclude 'wp-content/themes/*/dist/' \
               ./wordpress/ $SSH_USER_PROD@$SSH_HOST_PROD:$DEPLOY_PATH_PROD
            
 options:
