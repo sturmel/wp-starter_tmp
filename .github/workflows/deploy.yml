@@ -94,7 +94,7 @@ jobs:
       - name: Deploy via Rsync
         run: |
           echo "Déploiement en PREPROD..."
-          rsync -avz --delete \
+          rsync -avz --delete --chown=www-data:www-data \
             --exclude '.env' \
             --exclude 'wp-config.php' \
             --exclude 'node_modules/' \
@@ -136,7 +136,7 @@ jobs:
       - name: Deploy via Rsync
         run: |
           echo "Déploiement en PRODUCTION..."
-          rsync -avz --delete \
+          rsync -avz --delete --chown=www-data:www-data \
             --exclude '.env' \
             --exclude 'wp-config.php' \
             --exclude 'node_modules/' \
