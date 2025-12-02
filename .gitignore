@@ -20,11 +20,12 @@ wordpress/wp-content/themes/*/node_modules/
 wordpress/wp-content/themes/*/package-lock.json
 wordpress/wp-content/themes/*/dist/
 wordpress/wp-content/themes/*/dev_build/
-db_data/
+db-data/
 backups/
 n8n-data/
 qdrant-data/
 postgres-data/
+redis-data/
 wordpress/.htaccess
 
 

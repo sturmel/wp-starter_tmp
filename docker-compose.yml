@@ -1,6 +1,6 @@
 services:
   wordpress:
-    image: wordpress:php8.4-fpm-alpine
+    image: wordpress:php8.4-apache
     depends_on:
       - db
       - redis
