@@ -1,0 +1,144 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - stage
+      - main
+  workflow_dispatch:
+
+env:
+  THEME_NAME: ${{ vars.THEME_NAME || 'tiz' }}
+
+jobs:
+  build-php:
+    name: Build PHP (Timber)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+
+      - name: Install PHP dependencies
+        run: |
+          cd wordpress/wp-content/themes/timber-starter-theme
+          composer install --prefer-dist --no-dev --optimize-autoloader
+
+      - name: Upload PHP artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-vendor
+          path: wordpress/wp-content/themes/timber-starter-theme/vendor/
+
+  build-js-css:
+    name: Build JS/CSS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/package-lock.json
+
+      - name: Install and Build Assets
+        run: |
+          THEME_PATH="wordpress/wp-content/themes/${{ env.THEME_NAME }}"
+          echo "Using theme: ${{ env.THEME_NAME }}"
+          cd "$THEME_PATH"
+          npm ci || npm install
+          npm run build
+
+      - name: Upload Assets artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: theme-assets
+          path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/assets/
+
+  deploy-stage:
+    name: Deploy to Pre-production
+    needs: [build-php, build-js-css]
+    if: github.ref == 'refs/heads/stage'
+    runs-on: ubuntu-latest
+    environment: 
+      name: pre-production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download PHP artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: php-vendor
+          path: wordpress/wp-content/themes/timber-starter-theme/vendor/
+
+      - name: Download Assets artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: theme-assets
+          path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/assets/
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY_PREPROD }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST_PREPROD }} >> ~/.ssh/known_hosts
+
+      - name: Deploy via Rsync
+        run: |
+          echo "Déploiement en PREPROD..."
+          rsync -avz --delete \
+            --exclude '.env' \
+            --exclude 'node_modules/' \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            ./wordpress/ ${{ secrets.SSH_USER_PREPROD }}@${{ secrets.SSH_HOST_PREPROD }}:${{ secrets.DEPLOY_PATH_PREPROD }}
+
+  deploy-prod:
+    name: Deploy to Production
+    needs: [build-php, build-js-css]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download PHP artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: php-vendor
+          path: wordpress/wp-content/themes/timber-starter-theme/vendor/
+
+      - name: Download Assets artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: theme-assets
+          path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/assets/
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY_PROD }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST_PROD }} >> ~/.ssh/known_hosts
+
+      - name: Deploy via Rsync
+        run: |
+          echo "Déploiement en PRODUCTION..."
+          rsync -avz --delete \
+            --exclude '.env' \
+            --exclude 'node_modules/' \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            ./wordpress/ ${{ secrets.SSH_USER_PROD }}@${{ secrets.SSH_HOST_PROD }}:${{ secrets.DEPLOY_PATH_PROD }}

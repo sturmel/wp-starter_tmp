@@ -169,6 +169,8 @@ $GLOBALS['tiz_webhook_results'] = [];
 
 // Send webhook once per submission and skip emails
 add_filter('wpcf7_skip_mail', function ($skip, $contact_form) {
+    global $tiz_webhook_results;
+
     if (!is_object($contact_form) || !method_exists($contact_form, 'id')) {
         return $skip;
     }
@@ -184,7 +186,7 @@ add_filter('wpcf7_skip_mail', function ($skip, $contact_form) {
     $result = tiz_cf7_webhook_send_payload($contact_form, $map['webhook_url']);
 
     // Store result for later use
-    $GLOBALS['tiz_webhook_results'][$form_id] = $result;
+    $tiz_webhook_results[$form_id] = $result;
 
     // Set submission status based on webhook result
     if (class_exists('WPCF7_Submission')) {
@@ -228,23 +230,39 @@ function tiz_cf7_webhook_send_payload($contact_form, $webhook_url)
         $fields[$key] = $value;
     }
 
-    // Files metadata (filenames only)
+    // Files metadata (filenames, paths, and base64 content)
     $files = $submission->uploaded_files();
     $files_meta = [];
     if (is_array($files)) {
         foreach ($files as $field => $paths) {
-            if (is_array($paths)) {
-                $files_meta[$field] = array_map(function ($p) {
-                    return [
+            // Normalize to array
+            $path_list = is_array($paths) ? $paths : [$paths];
+
+            $files_meta[$field] = [];
+            foreach ($path_list as $p) {
+                if (is_string($p) && $p !== '' && file_exists($p)) {
+                    $file_size = filesize($p);
+                    $mime_type = mime_content_type($p) ?: 'application/octet-stream';
+                    $base64 = '';
+
+                    if ($file_size <= 4 * 1024 * 1024) {
+                        $content = file_get_contents($p);
+                        $base64 = $content !== false ? base64_encode($content) : '';
+                    }
+
+                    $files_meta[$field][] = [
                         'filename' => basename($p),
                         'path' => $p,
+                        'mime_type' => $mime_type,
+                        'base64' => $base64,
+                        'size' => $file_size,
                     ];
-                }, $paths);
-            } elseif (is_string($paths) && $paths !== '') {
-                $files_meta[$field] = [[
-                    'filename' => basename($paths),
-                    'path' => $paths,
-                ]];
+                }
+            }
+
+            // Clean up empty arrays if no valid files found
+            if (empty($files_meta[$field])) {
+                unset($files_meta[$field]);
             }
         }
     }
@@ -269,7 +287,7 @@ function tiz_cf7_webhook_send_payload($contact_form, $webhook_url)
     }
 
     $args = [
-        'timeout' => 15,
+        'timeout' => 45,
         'blocking' => true, // Wait for response
         'headers' => [
             'Content-Type' => 'application/json',
@@ -311,6 +329,8 @@ function tiz_cf7_webhook_send_payload($contact_form, $webhook_url)
 
 // Override the feedback response based on webhook result
 add_filter('wpcf7_feedback_response', function ($response, $result) {
+    global $tiz_webhook_results;
+
     if (!is_array($response)) {
         return $response;
     }
@@ -322,8 +342,8 @@ add_filter('wpcf7_feedback_response', function ($response, $result) {
     }
 
     // Check if we have a webhook result for this form
-    if ($form_id && isset($GLOBALS['tiz_webhook_results'][$form_id])) {
-        $webhook_result = $GLOBALS['tiz_webhook_results'][$form_id];
+    if ($form_id && isset($tiz_webhook_results[$form_id])) {
+        $webhook_result = $tiz_webhook_results[$form_id];
 
         if ($webhook_result['success']) {
             $response['status'] = 'mail_sent';

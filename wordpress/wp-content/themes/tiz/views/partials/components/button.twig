@@ -45,5 +45,5 @@ Inputs:
 	{# Subtle text shadow to improve perceived contrast (won't affect Lighthouse calc). Apply only on light-on-dark primary. #}
 	{% set text_shadow = (context != 'full_background' and variant == 'primary') ? 'text-shadow: 0 1px 1px rgba(0,0,0,0.25);' : '' %}
 
-	<a href="{{ button.link }}" class="{{ base }} {{ palette }} {{ extra_classes|default('') }}" {% if text_shadow %}style="{{ text_shadow }}"{% endif %}{% if target_attr %} target="{{ target_attr }}"{% endif %}{% if rel_attr %} rel="{{ rel_attr }}"{% endif %}>{{ button.label }}</a>
+	<a href="{{ button.link }}" {% if id %}id="{{ id }}"{% endif %} class="{{ base }} {{ palette }} {{ extra_classes|default('') }}" {% if text_shadow %}style="{{ text_shadow }}"{% endif %}{% if target_attr %} target="{{ target_attr }}"{% endif %}{% if rel_attr %} rel="{{ rel_attr }}"{% endif %}>{{ button.label }}</a>
 {% endif %}

@@ -1,10 +1,8 @@
-{% set email = 'hello@tiz.fr' %}
-
 {% set address_line1 = '104 rue Hochfelden' %}
 {% set address_line2 = '67200 Strasbourg' %}
 {% set maps_url = 'https://maps.google.com/?q=' ~ ('Agence Tiz 104 rue Hochfelden 67200 Strasbourg')|url_encode %}
 {% set cta_primary = { label: 'Parlons de votre projet', link: '/contactez-nous' } %}
-{% set cta_secondary = { label: 'Appelez-nous', link: 'tel:+33367101850'} %}
+{% set cta_secondary = { label: 'Nous rejoindre', link: '/demande-information'} %}
 
 <footer id="footer" class="w-full z-10 relative bg-black-haze-50">
 	<div class="container mx-auto px-6 lg:px-2 py-12 mt-12 md:mt-20">
@@ -41,9 +39,6 @@
 			<div class="scroll-animate rounded-tiz bg-azure-radiance-50 p-6 lg:p-8 flex flex-col justify-between bg-white">
 				<div class="space-y-3">
 					<h4 class="text-sm font-semibold tracking-wide text-dodger-blue-600 uppercase">Agence TIZ</h4>
-					<p class="text-bay-of-many-900">
-						<a href="mailto:{{ email }}" class="hover:text-bay-of-many-700">{{ email }}</a>
-					</p>
 					<p class="text-bay-of-many-900">
 						<a href="{{ 'tel:' ~ (phone|replace({' ': '', '.': '', '-': ''})) }}" class="hover:text-bay-of-many-700">{{ phone }}</a>
 					</p>

@@ -28,19 +28,14 @@ function theme_enqueue_styles_scripts()
         wp_get_theme()->get('Version')
     );
 
-    $wordpress_env = getenv('WORDPRESS_ENV') ?: 'production';
-    $is_dev = strtolower($wordpress_env) === 'development';
+    $wordpress_env = getenv('WORDPRESS_ENV');
 
-    // Switch assets between dev_build (watch mode) and dist (production build)
-    $assets_dir = $is_dev ? 'dev_build' : 'dist';
-    $css_file_name_relative = '/' . $assets_dir . '/' . ($is_dev ? 'styles.css' : 'styles.min.css');
-    $js_file_name_relative = '/' . $assets_dir . '/' . ($is_dev ? 'scripts.js' : 'scripts.min.js');
+
+    $css_file_name_relative = '/dist/styles.min.css';
+    $js_file_name_relative = '/dist/scripts.min.js';
+
 
     $theme_css_path = get_stylesheet_directory() . $css_file_name_relative;
-    if ($is_dev && !file_exists($theme_css_path)) {
-        $css_file_name_relative = '/dist/styles.min.css';
-        $theme_css_path = get_stylesheet_directory() . $css_file_name_relative;
-    }
     if (file_exists($theme_css_path)) {
         wp_enqueue_style(
             'tailwind-style',
@@ -51,10 +46,6 @@ function theme_enqueue_styles_scripts()
     }
 
     $theme_js_path = get_stylesheet_directory() . $js_file_name_relative;
-    if ($is_dev && !file_exists($theme_js_path)) {
-        $js_file_name_relative = '/dist/scripts.min.js';
-        $theme_js_path = get_stylesheet_directory() . $js_file_name_relative;
-    }
     if (file_exists($theme_js_path)) {
         wp_enqueue_script(
             'child-scripts',
