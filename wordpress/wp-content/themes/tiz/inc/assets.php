@@ -28,11 +28,18 @@ function theme_enqueue_styles_scripts()
         wp_get_theme()->get('Version')
     );
 
-    $wordpress_env = getenv('WORDPRESS_ENV');
+    // Récupère l'environnement : constante WP_ENV (wp-config.php) ou variable d'env (Docker)
+    // Par défaut : production si non défini
+    $wordpress_env = defined('WP_ENV') ? constant('WP_ENV') : (getenv('WORDPRESS_ENV') ?: 'production');
 
-
-    $css_file_name_relative = '/dist/styles.min.css';
-    $js_file_name_relative = '/dist/scripts.min.js';
+    // Utilise dev_build en développement, dist en production
+    if ($wordpress_env === 'development') {
+        $css_file_name_relative = '/dev_build/styles.css';
+        $js_file_name_relative = '/dev_build/scripts.js';
+    } else {
+        $css_file_name_relative = '/dist/styles.min.css';
+        $js_file_name_relative = '/dist/scripts.min.js';
+    }
 
 
     $theme_css_path = get_stylesheet_directory() . $css_file_name_relative;

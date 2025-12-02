@@ -35,9 +35,10 @@ jobs:
           name: php-vendor
           path: wordpress/wp-content/themes/timber-starter-theme/vendor/
 
-  build-js-css:
-    name: Build JS/CSS
+  build-js-css-prod:
+    name: Build JS/CSS (Production)
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -61,9 +62,36 @@ jobs:
           name: theme-dist
           path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist/
 
+  build-js-css-stage:
+    name: Build JS/CSS (Pre-production)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/stage'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install and Build Assets (dev mode)
+        run: |
+          THEME_PATH="wordpress/wp-content/themes/${{ env.THEME_NAME }}"
+          echo "Using theme: ${{ env.THEME_NAME }}"
+          cd "$THEME_PATH"
+          npm ci || npm install
+          npm run build:dev
+
+      - name: Upload dev_build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: theme-dev-build
+          path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/dev_build/
+
   deploy-stage:
     name: Deploy to Pre-production
-    needs: [build-php, build-js-css]
+    needs: [build-php, build-js-css-stage]
     if: github.ref == 'refs/heads/stage'
     runs-on: ubuntu-latest
     environment: 
@@ -78,11 +106,11 @@ jobs:
           name: php-vendor
           path: wordpress/wp-content/themes/timber-starter-theme/vendor/
 
-      - name: Download dist artifacts
+      - name: Download dev_build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: theme-dist
-          path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist/
+          name: theme-dev-build
+          path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/dev_build/
 
       - name: Setup SSH
         run: |
@@ -105,7 +133,7 @@ jobs:
 
   deploy-prod:
     name: Deploy to Production
-    needs: [build-php, build-js-css]
+    needs: [build-php, build-js-css-prod]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: 

@@ -167,6 +167,24 @@ echo "ssh-ed25519 AAAA... github-actions" >> ~/.ssh/authorized_keys
 tail -1 ~/.ssh/authorized_keys
 ```
 
+### Step 2b: Configure WP_ENV on Server
+
+Add this line to `wp-config.php` on each server:
+
+**Pre-production server:**
+```php
+define('WP_ENV', 'development');
+```
+
+**Production server:**
+```php
+define('WP_ENV', 'production');
+```
+
+This determines which assets folder the theme uses:
+- `development` → `dev_build/` (unminified, with source maps)
+- `production` → `dist/` (minified, optimized)
+
 ### Step 3: Test SSH Connection
 
 ```bash
