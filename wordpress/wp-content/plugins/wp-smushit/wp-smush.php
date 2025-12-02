@@ -13,7 +13,7 @@
  * Plugin Name:       Smush
  * Plugin URI:        https://wpmudev.com/project/wp-smush-pro/
  * Description:       Reduce image file sizes, improve performance and boost your SEO using the free <a href="https://wpmudev.com/">WPMU DEV</a> WordPress Smush API.
- * Version:           3.22.1
+ * Version:           3.22.3
  * Requires at least: 6.4
  * Requires PHP:      7.4
  * Author:            WPMU DEV
@@ -51,7 +51,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 if ( ! defined( 'WP_SMUSH_VERSION' ) ) {
-	define( 'WP_SMUSH_VERSION', '3.22.1' );
+	define( 'WP_SMUSH_VERSION', '3.22.3' );
 }
 // Used to define body class.
 if ( ! defined( 'WP_SHARED_UI_VERSION' ) ) {
@@ -285,6 +285,24 @@ if ( ! class_exists( 'WP_Smush' ) ) {
 			add_action( 'init', array( $this, 'do_plugin_activated_action' ) );
 
 			add_action( 'init', array( $this, 'load_cross_sell_module' ), 5 );
+
+			// Add Black Friday campaign module.
+			add_action(
+				'init',
+				function () {
+					if ( Membership::get_instance()->is_pro() ) {
+						return;
+					}
+
+					if ( ! class_exists( '\WPMUDEV\Modules\BlackFriday\Campaign' ) ) {
+						$black_friday_path = WP_SMUSH_DIR . 'core/external/wpmudev-black-friday/campaign.php';
+						if ( file_exists( $black_friday_path ) ) {
+							require_once $black_friday_path;
+							new \WPMUDEV\Modules\BlackFriday\Campaign();
+						}
+					}
+				}
+			);
 
 			$this->init();
 		}
