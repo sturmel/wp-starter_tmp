@@ -41,8 +41,10 @@ pipelines:
             - echo "Déploiement en PREPROD..."
             - rsync -avz --delete \
               --exclude '.env' \
+              --exclude 'wp-config.php' \
               --exclude 'node_modules/' \
               --exclude '.git/' \
+              --exclude 'wp-content/uploads/' \
               ./wordpress/ $SSH_USER_PREPROD@$SSH_HOST_PREPROD:$DEPLOY_PATH_PREPROD
 
     main:
@@ -55,8 +57,10 @@ pipelines:
             - echo "Déploiement en PRODUCTION..."
             - rsync -avz --delete \
               --exclude '.env' \
+              --exclude 'wp-config.php' \
               --exclude 'node_modules/' \
               --exclude '.git/' \
+              --exclude 'wp-content/uploads/' \
               ./wordpress/ $SSH_USER_PROD@$SSH_HOST_PROD:$DEPLOY_PATH_PROD
            
 options:

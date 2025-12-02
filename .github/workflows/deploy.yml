@@ -96,9 +96,11 @@ jobs:
           echo "Déploiement en PREPROD..."
           rsync -avz --delete \
             --exclude '.env' \
+            --exclude 'wp-config.php' \
             --exclude 'node_modules/' \
             --exclude '.git/' \
             --exclude '.github/' \
+            --exclude 'wp-content/uploads/' \
             ./wordpress/ ${{ secrets.SSH_USER_PREPROD }}@${{ secrets.SSH_HOST_PREPROD }}:${{ secrets.DEPLOY_PATH_PREPROD }}
 
   deploy-prod:
@@ -136,7 +138,9 @@ jobs:
           echo "Déploiement en PRODUCTION..."
           rsync -avz --delete \
             --exclude '.env' \
+            --exclude 'wp-config.php' \
             --exclude 'node_modules/' \
             --exclude '.git/' \
             --exclude '.github/' \
+            --exclude 'wp-content/uploads/' \
             ./wordpress/ ${{ secrets.SSH_USER_PROD }}@${{ secrets.SSH_HOST_PROD }}:${{ secrets.DEPLOY_PATH_PROD }}
