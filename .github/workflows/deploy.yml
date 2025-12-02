@@ -55,11 +55,11 @@ jobs:
           npm ci || npm install
           npm run build
 
-      - name: Upload Assets artifacts
+      - name: Upload dist artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: theme-assets
-          path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/assets/
+          name: theme-dist
+          path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist/
 
   deploy-stage:
     name: Deploy to Pre-production
@@ -78,16 +78,11 @@ jobs:
           name: php-vendor
           path: wordpress/wp-content/themes/timber-starter-theme/vendor/
 
-      - name: Download Assets artifacts
+      - name: Download dist artifacts
         uses: actions/download-artifact@v4
         with:
-          name: theme-assets
-          path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/assets/
-
-      - name: Copy assets to dist
-        run: |
-          mkdir -p wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist
-          cp -r wordpress/wp-content/themes/${{ env.THEME_NAME }}/assets/* wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist/
+          name: theme-dist
+          path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist/
 
       - name: Setup SSH
         run: |
@@ -125,16 +120,11 @@ jobs:
           name: php-vendor
           path: wordpress/wp-content/themes/timber-starter-theme/vendor/
 
-      - name: Download Assets artifacts
+      - name: Download dist artifacts
         uses: actions/download-artifact@v4
         with:
-          name: theme-assets
-          path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/assets/
-
-      - name: Copy assets to dist
-        run: |
-          mkdir -p wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist
-          cp -r wordpress/wp-content/themes/${{ env.THEME_NAME }}/assets/* wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist/
+          name: theme-dist
+          path: wordpress/wp-content/themes/${{ env.THEME_NAME }}/dist/
 
       - name: Setup SSH
         run: |
