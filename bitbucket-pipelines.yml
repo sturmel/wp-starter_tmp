@@ -14,8 +14,8 @@ definitions:
         artifacts:
           - wordpress/wp-content/themes/timber-starter-theme/vendor/**
           
-    - step: &build-js-css
-        name: Build JS/CSS
+    - step: &build-js-css-prod
+        name: Build JS/CSS (Production)
         image: node:22
         caches:
           - node
@@ -27,14 +27,29 @@ definitions:
           - npm ci || npm install
           - npm run build
         artifacts:
-          - wordpress/wp-content/themes/*/assets/**
+          - wordpress/wp-content/themes/*/dist/**
+
+    - step: &build-js-css-stage
+        name: Build JS/CSS (Pre-production)
+        image: node:22
+        caches:
+          - node
+        script:
+          - 'THEME_NAME=${THEME_NAME:-tiz}'
+          - 'THEME_PATH="wordpress/wp-content/themes/${THEME_NAME}"'
+          - 'echo "Using theme: ${THEME_NAME}"'
+          - 'cd "${THEME_PATH}"'
+          - npm ci || npm install
+          - npm run build:dev
+        artifacts:
+          - wordpress/wp-content/themes/*/dev_build/**
 
 pipelines:
   branches:
     
     stage:
       - step: *build-php     
-      - step: *build-js-css
+      - step: *build-js-css-stage
       - step:
           name: ✅ Deploy to Pre-production
           script:
@@ -45,12 +60,11 @@ pipelines:
               --exclude 'node_modules/' \
               --exclude '.git/' \
               --exclude 'wp-content/uploads/' \
-              --exclude 'wp-content/themes/*/dist/' \
               ./wordpress/ $SSH_USER_PREPROD@$SSH_HOST_PREPROD:$DEPLOY_PATH_PREPROD
 
     main:
       - step: *build-php  
-      - step: *build-js-css  
+      - step: *build-js-css-prod  
       - step:
           name: 🛑 Deploy to PRODUCTION
           trigger: manual 
@@ -62,7 +76,6 @@ pipelines:
               --exclude 'node_modules/' \
               --exclude '.git/' \
               --exclude 'wp-content/uploads/' \
-              --exclude 'wp-content/themes/*/dist/' \
               ./wordpress/ $SSH_USER_PROD@$SSH_HOST_PROD:$DEPLOY_PATH_PROD
            
 options:

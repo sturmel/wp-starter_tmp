@@ -26,7 +26,7 @@ This repository contains a complete Docker-based WordPress stack with integrated
 - Composer 2 (for PHP dependencies)
 
 **For production servers:**
-- PHP 8.2+
+- PHP 8.4+
 - MySQL 8.0+
 - Nginx or Apache
 - No Docker required (CI/CD handles deployment)
@@ -88,7 +88,7 @@ This repository contains a complete Docker-based WordPress stack with integrated
 
 ### Server Requirements
 
-- PHP 8.2+ with required extensions (mysql, curl, gd, mbstring, xml, zip)
+- PHP 8.4+ with required extensions (mysql, curl, gd, mbstring, xml, zip)
 - MySQL 8.0+ or MariaDB 10.5+
 - Nginx or Apache with proper rewrite rules
 - SSL certificate (Let's Encrypt recommended)
@@ -292,6 +292,20 @@ Go to: `Repository Settings → SSH keys`
 
 Same as GitHub - add the public key to `~/.ssh/authorized_keys` on the server.
 
+### Step 3b: Configure WP_ENV on Server
+
+Same as GitHub - add `WP_ENV` constant to `wp-config.php`:
+
+**Pre-production server:**
+```php
+define('WP_ENV', 'development');
+```
+
+**Production server:**
+```php
+define('WP_ENV', 'production');
+```
+
 ### Step 4: Create Repository Variables
 
 Go to: `Repository Settings → Repository variables`
@@ -319,11 +333,12 @@ git push -u origin stage
 ```bash
 # Deploy to preprod (automatic)
 git push origin stage
-# → Pipeline runs automatically
+# → Pipeline builds with npm run build:dev → deploys dev_build/
 
 # Deploy to production (manual trigger)
 git push origin main
 # → Go to Bitbucket Pipelines → Click "Run" on the manual step
+# → Builds with npm run build → deploys dist/
 ```
 
 ---
@@ -338,6 +353,8 @@ git push origin main
 | Manual approval | Environment protection rules | `trigger: manual` in pipeline |
 | Preprod trigger | Push to `stage` | Push to `stage` |
 | Prod trigger | Push to `main` + approval | Push to `main` + manual click |
+| **Stage build** | `npm run build:dev` → `dev_build/` | `npm run build:dev` → `dev_build/` |
+| **Main build** | `npm run build` → `dist/` | `npm run build` → `dist/` |
 
 ### CI/CD Best Practices
 
