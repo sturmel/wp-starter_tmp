@@ -101,60 +101,215 @@ This repository contains a complete Docker-based WordPress stack with integrated
 
 ## 🚀 CI/CD (Bitbucket Pipelines & GitHub Actions)
 
-**Configuration:**
+**Configuration files:**
 - Bitbucket: `bitbucket-pipelines.yml`
 - GitHub: `.github/workflows/deploy.yml`
 
 ### Pipeline Steps
 
 1. **Build Timber Theme (Parent Theme)**
-   - Image: `composer:latest`
+   - Image: `composer:2`
    - Commands: `composer install --prefer-dist --no-dev --optimize-autoloader`
    - Directory: `timber-starter-theme`
    - Result: Optimized PHP dependencies for production
 
-2. **Build Tiz Theme (Child Theme)**
+2. **Build Child Theme (JS/CSS)**
    - Image: `node:22`
-   - Commands: 
-     ```bash
-     npm ci
-     npm run build
-     ```
-   - Directory: `tiz`
+   - Commands: `npm ci && npm run build`
+   - Directory: Theme specified by `THEME_NAME` variable (default: `tiz`)
    - Result: Compiled, minified and optimized front-end assets
 
-3. **Deployment Artifacts**
-   - PHP dependencies ready for production (without dev-dependencies)
-   - Optimized front-end assets in `dist/` directory
-   - Source code and configuration ready for deployment
-   - All necessary files packaged for production server
-
-
-### CI/CD Best Practices
-- **Complete automation**: All builds are managed by the pipeline
-- **Reproducibility**: Same build environment for every deployment
-- **Optimization**: Minified assets and production-only dependencies
-- **Validation**: Automatic tests before deployment
+3. **Deploy to Server**
+   - Uses `rsync` over SSH to sync files to the server
+   - Excludes `.env`, `node_modules/`, `.git/`, `.github/`
+   - Preserves server-side configuration
 
 ### Branch Workflow
 
-- **Active branches**: `main` (production source of truth), `stage` (pre-production), feature branches created from `stage`.
-- **Feature cycle**: step 1 branch from `stage` (`feature/...`); step 2 develop and test locally with the Docker stack; step 3 merge back into `stage` via Pull Request or local merge; step 4 push to `stage` to trigger the staging pipeline that rebuilds assets and deploys to pre-production; step 5 run acceptance tests in pre-production.
-- **Production release**: step 1 merge `stage` into `main` after validation; step 2 push to `main` to trigger the production pipeline, reusing the artifacts built on `stage` for deployment to production.
+```
+feature/xxx  →  stage (pre-production)  →  main (production)
+     ↓              ↓                          ↓
+  Local dev    Auto-deploy to           Manual approval
+               preprod server           then deploy to prod
+```
 
-### Pipeline Variables
+1. **Feature development**: Create branch from `stage`, develop locally with Docker
+2. **Pre-production**: Merge to `stage` → auto-deploy to preprod server
+3. **Production**: Merge `stage` to `main` → deploy to production (manual approval on GitHub)
 
-**Bitbucket Variables:**
-- `THEME_NAME`: WordPress theme directory (`tiz` by default)
-- `SSH_USER_PREPROD`, `SSH_HOST_PREPROD`, `DEPLOY_PATH_PREPROD`
-- `SSH_USER_PROD`, `SSH_HOST_PROD`, `DEPLOY_PATH_PROD`
+---
 
-**GitHub Secrets:**
-- `THEME_NAME` (optional, in Variables)
-- `SSH_PRIVATE_KEY_PREPROD`, `SSH_HOST_PREPROD`, `SSH_USER_PREPROD`, `DEPLOY_PATH_PREPROD`
-- `SSH_PRIVATE_KEY_PROD`, `SSH_HOST_PROD`, `SSH_USER_PROD`, `DEPLOY_PATH_PROD`
+## 🔧 GitHub Actions Setup (Step by Step)
 
-**Note:** For GitHub, configure "Required reviewers" on the `production` environment to enable manual approval before production deployment.
+### Step 1: Generate SSH Key (on your local machine)
+
+```bash
+# Create a dedicated key WITHOUT passphrase
+ssh-keygen -t ed25519 -f ~/.ssh/deploy_github_actions -C "github-actions" -N ""
+
+# Display the PRIVATE key (for GitHub Secrets)
+cat ~/.ssh/deploy_github_actions
+
+# Display the PUBLIC key (for the server)
+cat ~/.ssh/deploy_github_actions.pub
+```
+
+### Step 2: Add Public Key to Server
+
+```bash
+# Connect to your server
+ssh root@YOUR_SERVER_IP
+
+# Add the public key
+echo "ssh-ed25519 AAAA... github-actions" >> ~/.ssh/authorized_keys
+
+# Verify
+tail -1 ~/.ssh/authorized_keys
+```
+
+### Step 3: Test SSH Connection
+
+```bash
+# From your local machine
+ssh -i ~/.ssh/deploy_github_actions root@YOUR_SERVER_IP "echo OK"
+# Should display: OK
+```
+
+### Step 4: Create GitHub Secrets
+
+Go to: `https://github.com/YOUR_USERNAME/YOUR_REPO/settings/secrets/actions`
+
+Click **"New repository secret"** for each:
+
+| Secret Name | Value |
+|-------------|-------|
+| `SSH_PRIVATE_KEY_PREPROD` | Content of `~/.ssh/deploy_github_actions` (entire private key) |
+| `SSH_HOST_PREPROD` | Server IP (e.g., `51.210.183.88`) |
+| `SSH_USER_PREPROD` | SSH user (e.g., `root`) |
+| `DEPLOY_PATH_PREPROD` | Server path (e.g., `/var/www/preprod/wordpress`) |
+| `SSH_PRIVATE_KEY_PROD` | Same private key (or different for prod server) |
+| `SSH_HOST_PROD` | Production server IP |
+| `SSH_USER_PROD` | Production SSH user |
+| `DEPLOY_PATH_PROD` | Production server path |
+
+### Step 5: Create GitHub Environments
+
+Go to: `https://github.com/YOUR_USERNAME/YOUR_REPO/settings/environments`
+
+1. Create environment **`pre-production`**
+   - No protection rules (auto-deploy on push to `stage`)
+
+2. Create environment **`production`**
+   - Check **"Required reviewers"**
+   - Add yourself as reviewer
+   - This enables manual approval before production deployment
+
+### Step 6: Create Variables (Optional)
+
+Go to: `https://github.com/YOUR_USERNAME/YOUR_REPO/settings/variables/actions`
+
+| Variable Name | Value |
+|---------------|-------|
+| `THEME_NAME` | `tiz` (or your theme name) |
+
+### Step 7: Create the `stage` Branch
+
+```bash
+git checkout main
+git checkout -b stage
+git push -u origin stage
+```
+
+### Usage
+
+```bash
+# Deploy to preprod (automatic)
+git checkout stage
+git merge feature/my-feature
+git push origin stage
+# → Pipeline runs and deploys to preprod
+
+# Deploy to production (manual approval)
+git checkout main
+git merge stage
+git push origin main
+# → Go to GitHub Actions → Approve deployment
+```
+
+---
+
+## 🔧 Bitbucket Pipelines Setup (Step by Step)
+
+### Step 1: Generate SSH Key
+
+Same as GitHub - create a key pair without passphrase.
+
+### Step 2: Add SSH Key to Bitbucket
+
+Go to: `Repository Settings → SSH keys`
+
+1. Click **"Use my own keys"**
+2. Paste your **private key**
+3. Bitbucket will extract and display the public key
+
+### Step 3: Add Public Key to Server
+
+Same as GitHub - add the public key to `~/.ssh/authorized_keys` on the server.
+
+### Step 4: Create Repository Variables
+
+Go to: `Repository Settings → Repository variables`
+
+| Variable Name | Value | Secured |
+|---------------|-------|---------|
+| `SSH_USER_PREPROD` | `root` | No |
+| `SSH_HOST_PREPROD` | `51.210.183.88` | No |
+| `DEPLOY_PATH_PREPROD` | `/var/www/preprod/wordpress` | No |
+| `SSH_USER_PROD` | `root` | No |
+| `SSH_HOST_PROD` | `51.210.183.88` | No |
+| `DEPLOY_PATH_PROD` | `/var/www/prod/wordpress` | No |
+| `THEME_NAME` | `tiz` | No |
+
+### Step 5: Create the `stage` Branch
+
+```bash
+git checkout main
+git checkout -b stage
+git push -u origin stage
+```
+
+### Usage
+
+```bash
+# Deploy to preprod (automatic)
+git push origin stage
+# → Pipeline runs automatically
+
+# Deploy to production (manual trigger)
+git push origin main
+# → Go to Bitbucket Pipelines → Click "Run" on the manual step
+```
+
+---
+
+## 📋 CI/CD Quick Reference
+
+| Action | GitHub | Bitbucket |
+|--------|--------|-----------|
+| Config file | `.github/workflows/deploy.yml` | `bitbucket-pipelines.yml` |
+| Secrets location | Settings → Secrets → Actions | Repository Settings → Repository variables |
+| SSH key storage | In secrets (`SSH_PRIVATE_KEY_*`) | Repository Settings → SSH keys |
+| Manual approval | Environment protection rules | `trigger: manual` in pipeline |
+| Preprod trigger | Push to `stage` | Push to `stage` |
+| Prod trigger | Push to `main` + approval | Push to `main` + manual click |
+
+### CI/CD Best Practices
+
+- **Never commit secrets** - Use platform secrets/variables
+- **Use dedicated SSH keys** - Don't reuse personal keys
+- **No passphrase on CI keys** - CI can't enter passwords
+- **Test locally first** - Verify SSH connection before pushing
+- **Keep `package-lock.json`** - Ensures reproducible builds
 
 ### Stopping the Stacks
 
