@@ -17,7 +17,7 @@ wordpress/wp-content/litespeed/
 
 # Ignore build / vendor artifacts inside themes (but not theme source)
 wordpress/wp-content/themes/*/node_modules/
-wordpress/wp-content/themes/*/package-lock.json
+# wordpress/wp-content/themes/*/package-lock.json
 wordpress/wp-content/themes/*/dist/
 wordpress/wp-content/themes/*/dev_build/
 db-data/
