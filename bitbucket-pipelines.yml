@@ -61,6 +61,9 @@ pipelines:
               --exclude '.git/' \
               --exclude 'wp-content/uploads/' \
               ./wordpress/ $SSH_USER_PREPROD@$SSH_HOST_PREPROD:$DEPLOY_PATH_PREPROD
+            - echo "🔄 Running post-deploy commands..."
+            - ssh $SSH_USER_PREPROD@$SSH_HOST_PREPROD "cd $DEPLOY_PATH_PREPROD && wp core update-db --allow-root && wp theme activate ${THEME_NAME:-tiz} --allow-root && wp cache flush --allow-root && wp rewrite flush --allow-root"
+            - echo "✅ Post-deploy completed!"
 
     main:
       - step: *build-php  
@@ -77,6 +80,9 @@ pipelines:
               --exclude '.git/' \
               --exclude 'wp-content/uploads/' \
               ./wordpress/ $SSH_USER_PROD@$SSH_HOST_PROD:$DEPLOY_PATH_PROD
+            - echo "🔄 Running post-deploy commands..."
+            - ssh $SSH_USER_PROD@$SSH_HOST_PROD "cd $DEPLOY_PATH_PROD && wp core update-db --allow-root && wp theme activate ${THEME_NAME:-tiz} --allow-root && wp cache flush --allow-root && wp rewrite flush --allow-root"
+            - echo "✅ Post-deploy completed!"
            
 options:
   size: 2x
