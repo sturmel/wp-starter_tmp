@@ -135,14 +135,14 @@ jobs:
         run: |
           ssh ${{ secrets.SSH_USER_PREPROD }}@${{ secrets.SSH_HOST_PREPROD }} '
             cd ${{ secrets.DEPLOY_PATH_PREPROD }} &&
-            echo "🔄 Running database migrations..." &&
+            echo "Running database migrations..." &&
             wp core update-db --allow-root &&
-            echo "🎨 Activating theme..." &&
+            echo "Activating theme..." &&
             wp theme activate ${{ env.THEME_NAME }} --allow-root &&
-            echo "🧹 Flushing caches..." &&
+            echo "Flushing caches..." &&
             wp cache flush --allow-root &&
             wp rewrite flush --allow-root &&
-            echo "✅ Post-deploy completed!"
+            echo "Post-deploy completed!"
           '
 
   deploy-prod:
@@ -191,12 +191,12 @@ jobs:
         run: |
           ssh ${{ secrets.SSH_USER_PROD }}@${{ secrets.SSH_HOST_PROD }} '
             cd ${{ secrets.DEPLOY_PATH_PROD }} &&
-            echo "🔄 Running database migrations..." &&
+            echo "Running database migrations..." &&
             wp core update-db --allow-root &&
-            echo "🎨 Activating theme..." &&
+            echo "Activating theme..." &&
             wp theme activate ${{ env.THEME_NAME }} --allow-root &&
-            echo "🧹 Flushing caches..." &&
+            echo "Flushing caches..." &&
             wp cache flush --allow-root &&
             wp rewrite flush --allow-root &&
-            echo "✅ Post-deploy completed!"
+            echo "Post-deploy completed!"
           '
