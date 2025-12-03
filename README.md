@@ -276,25 +276,60 @@ git push origin main
 
 ## 🔧 Bitbucket Pipelines Setup (Step by Step)
 
-### Step 1: Generate SSH Key
+### Step 1: Generate SSH Key (on your local machine)
 
-Same as GitHub - create a key pair without passphrase.
+Generate a **dedicated key pair** for Bitbucket Pipelines (not the server's existing key):
+
+```bash
+# Create a dedicated key WITHOUT passphrase
+ssh-keygen -t ed25519 -f ~/.ssh/bitbucket_deploy -C "bitbucket-pipelines" -N ""
+
+# Display the PRIVATE key (for Bitbucket)
+cat ~/.ssh/bitbucket_deploy
+
+# Display the PUBLIC key (for the server)
+cat ~/.ssh/bitbucket_deploy.pub
+```
+
+This creates:
+- `~/.ssh/bitbucket_deploy` → **private key** (goes to Bitbucket)
+- `~/.ssh/bitbucket_deploy.pub` → **public key** (goes to the server)
 
 ### Step 2: Add SSH Key to Bitbucket
 
 Go to: `Repository Settings → SSH keys`
 
 1. Click **"Use my own keys"**
-2. Paste your **private key**
+2. Paste the entire **private key** content (including `-----BEGIN...` and `-----END...`)
 3. Bitbucket will extract and display the public key
 
 ### Step 3: Add Public Key to Server
 
-Same as GitHub - add the public key to `~/.ssh/authorized_keys` on the server.
+Connect to your server and add the **public key** to authorized keys:
 
-### Step 3b: Configure WP_ENV on Server
+```bash
+# Connect to your server
+ssh root@YOUR_SERVER_IP
 
-Same as GitHub - add `WP_ENV` constant to `wp-config.php`:
+# Add the public key (replace with your actual key)
+echo "ssh-ed25519 AAAA... bitbucket-pipelines" >> ~/.ssh/authorized_keys
+
+# Verify
+tail -1 ~/.ssh/authorized_keys
+```
+
+### Step 3b: Test SSH Connection
+
+From your local machine, verify the key works:
+
+```bash
+ssh -i ~/.ssh/bitbucket_deploy root@YOUR_SERVER_IP "echo OK"
+# Should display: OK
+```
+
+### Step 3c: Configure WP_ENV on Server
+
+Add `WP_ENV` constant to `wp-config.php` on each server **before** `/* That's all, stop editing! */`:
 
 **Pre-production server:**
 ```php
@@ -310,36 +345,23 @@ define('WP_ENV', 'production');
 
 Go to: `Repository Settings → Repository variables`
 
-| Variable Name | Value | Secured |
-|---------------|-------|---------|
-| `SSH_USER_PREPROD` | `root` | No |
-| `SSH_HOST_PREPROD` | `51.210.183.88` | No |
-| `DEPLOY_PATH_PREPROD` | `/var/www/preprod/wordpress` | No |
-| `SSH_USER_PROD` | `root` | No |
-| `SSH_HOST_PROD` | `51.210.183.88` | No |
-| `DEPLOY_PATH_PROD` | `/var/www/prod/wordpress` | No |
-| `THEME_NAME` | `tiz` | No |
+#### Required Variables
 
-### Step 5: Create the `stage` Branch
+| Variable Name | Description | Example | Secured |
+|---------------|-------------|---------|---------|
+| `SSH_USER_PREPROD` | SSH user for preprod server | `root` | No |
+| `SSH_HOST_PREPROD` | Preprod server IP or domain | `51.210.183.88` | No |
+| `DEPLOY_PATH_PREPROD` | Deployment path on preprod | `/var/www/preprod.example.com` | No |
+| `SSH_USER_PROD` | SSH user for production server | `root` | No |
+| `SSH_HOST_PROD` | Production server IP or domain | `51.210.183.88` | No |
+| `DEPLOY_PATH_PROD` | Deployment path on production | `/var/www/example.com` | No |
 
-```bash
-git checkout main
-git checkout -b stage
-git push -u origin stage
-```
+#### Optional Variables
 
-### Usage
+| Variable Name | Description | Default Value | Secured |
+|---------------|-------------|---------------|---------|
+| `THEME_NAME` | Name of the theme to build | `tiz` | No |
 
-```bash
-# Deploy to preprod (automatic)
-git push origin stage
-# → Pipeline builds with npm run build:dev → deploys dev_build/
-
-# Deploy to production (manual trigger)
-git push origin main
-# → Go to Bitbucket Pipelines → Click "Run" on the manual step
-# → Builds with npm run build → deploys dist/
-```
 
 ---
 
